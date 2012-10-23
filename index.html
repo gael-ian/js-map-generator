@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Random map generator</title>
+    <style>
+      body     { margin: 0px; padding: 0px; }
+      #wrapper { width: 960px; margin: 15px auto; }
+      canvas   { border: 1px solid #000; margin: auto; }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <canvas id="map" width="950" height="750"></canvas>
+    </div>
+    
+    <script type="text/javascript" src="./javascripts/voronoi.js"></script>
+    <script type="text/javascript" src="./javascripts/map.js"></script>
+    <script type="text/javascript">
+    
+      var canvas  = document.getElementById('map'),
+          m       = new map.builder(canvas);
+          
+      m.generate();
+      
+    </script>
+  </body>
+</html>
