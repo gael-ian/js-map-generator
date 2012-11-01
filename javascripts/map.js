@@ -1,54 +1,67 @@
-var map = {
+map = {
   core:  {},
   graph: {},
   utils: {}
 };
 
 map.utils.genKey = function(x, y) {
-  return ['_', Math.round(x), Math.round(y)].join('_');
-}
+  return ['', Math.round(x), Math.round(y)].join('_');
+};
+
+map.core.dictionary = function() {
+  Object.apply(this, arguments);
+};
+map.core.dictionary.prototype = new Object();
+  
+map.core.dictionary.prototype.each = function(iterator, scope) {
+  var keys = Object.keys(this);
+  for(var i in keys){
+    iterator.call(scope, this[keys[i]], i, this);
+  }
+};
 
 map.core.point = function(x, y) {
   this.x = x;
   this.y = y;
 };
 
-map.graph.center = function(point) {
-  
-  this.point      = point;
-  this.neightbors = {};
-  this.edges      = {};
-  this.corners    = {};
-  
-  this.key = function() {
-    return map.utils.genKey(this.point.x, this.point.y);
-  }
-  
+map.graph.location = function(point) {
+  this.point = point;
 };
 
+map.graph.location.prototype.key = function() {
+  return map.utils.genKey(this.point.x, this.point.y);
+}
+
+map.graph.center = function(point) {
+  map.graph.location.call(this, point);
+  
+  this.neighbors  = new map.core.dictionary();
+  this.edges      = new map.core.dictionary();
+  this.corners    = new map.core.dictionary();
+  
+};
+map.graph.center.prototype = new map.graph.location();
+
 map.graph.corner = function(point) {
+  map.graph.location.call(this, point);
   
-  this.point      = point;
-  this.centers    = {};
-  this.edges      = {};
+  this.centers    = new map.core.dictionary();
+  this.edges      = new map.core.dictionary();
+};
+map.graph.corner.prototype = new map.graph.location();
   
-  this.key = function() {
-    return map.utils.genKey(this.point.x, this.point.y);
-  }
-  
+map.graph.corner.prototype.border = function() {
+    return (this.point.x == 0 || this.point.y == 0)
 };
 
 map.graph.edge = function(point) {
+  map.graph.location.call(this, point);
   
-  this.point      = point;
-  this.centers    = {};
-  this.corners    = {};
-  
-  this.key = function() {
-    return map.utils.genKey(this.point.x, this.point.y);
-  }
-  
+  this.centers    = new map.core.dictionary();
+  this.corners    = new map.core.dictionary();
 };
+map.graph.edge.prototype = new map.graph.location();
 
 map.builder = function(canvas) {
 
@@ -61,18 +74,18 @@ map.builder = function(canvas) {
   this.points       = [];
   this.buildSteps   = [];
         
-  this.centers = {};
-  this.edges   = {};
-  this.corners = {};
+  this.centers = new map.core.dictionary();
+  this.edges   = new map.core.dictionary();
+  this.corners = new map.core.dictionary();
     
   this.reset = function() {
       
     this.points     = [];
     this.buildSteps = [];
         
-    this.centers = {};
-    this.edges   = {};
-    this.corners = {};
+    this.centers = new map.core.dictionary();
+    this.edges   = new map.core.dictionary();
+    this.corners = new map.core.dictionary();
       
     this.clearCanvas();
   };
@@ -90,8 +103,7 @@ map.builder = function(canvas) {
       callback: function() {
           
         this.points = [];
-        var num_points = Math.round((this.width * this.height) / 500);
-        for (var i = 0; i <= num_points; i++) {
+        for (var i = 0, num_points = Math.round((this.width * this.height) / 500); i <= num_points; i++) {
           var x = Math.floor(Math.random() * (this.width  - 10))
             , y = Math.floor(Math.random() * (this.height - 10));
             
@@ -115,22 +127,21 @@ map.builder = function(canvas) {
         
         var voronoi = new Voronoi()
           , diagram = voronoi.compute(this.points, { xl: 0, xr: this.width, yt: 0, yb: this.height })
-          , self    = this
           ;
         
         // Build centers
         this.points.forEach(function(p) {
           var c = new map.graph.center(p);
-          self.centers[c.key()] = c;
-        });
+          this.centers[c.key()] = c;
+        }, this);
         
         // Associates edges and corners
         diagram.edges.forEach(function(e, i) {
           
           var point = new map.core.point(((e.va.x + e.vb.x) / 2), ((e.va.y + e.vb.y) / 2))
             , edge  = new map.graph.edge(point)
-            , ca    = (self.corners[map.utils.genKey(e.va.x, e.va.y)] || new map.graph.corner(new map.core.point(e.va.x, e.va.y)))
-            , cb    = (self.corners[map.utils.genKey(e.vb.x, e.vb.y)] || new map.graph.corner(new map.core.point(e.vb.x, e.vb.y)))
+            , ca    = (this.corners[map.utils.genKey(e.va.x, e.va.y)] || new map.graph.corner(new map.core.point(e.va.x, e.va.y)))
+            , cb    = (this.corners[map.utils.genKey(e.vb.x, e.vb.y)] || new map.graph.corner(new map.core.point(e.vb.x, e.vb.y)))
             ;
           
           ca.edges[edge.key()] = cb.edges[edge.key()] = edge;
@@ -140,34 +151,29 @@ map.builder = function(canvas) {
           
           [e.lSite, e.rSite].forEach(function(site) {
             if (site) {
-              var c = self.centers[map.utils.genKey(site.x, site.y)];
+              var c = this.centers[map.utils.genKey(site.x, site.y)];
               
               edge.centers[c.key()] = ca.centers[c.key()] = cb.centers[c.key()] = c;
               c.edges[edge.key()] = edge;
               c.corners[ca.key()] = ca;
               c.corners[cb.key()] = cb;
             }
+          }, this);
+          
+          this.edges[edge.key()] = edge;
+          this.corners[ca.key()] = ca;
+          this.corners[cb.key()] = cb;
+          
+        }, this);
+        
+        // Compute neighbors
+        this.centers.each(function(c) {
+          c.edges.each(function (e) {
+            e.centers.each(function(n) {
+              if (c.key() != n.key()) c.neighbors[n.key()] = n;
+            });
           });
-          
-          self.edges[edge.key()] = edge;
-          self.corners[ca.key()] = ca;
-          self.corners[cb.key()] = cb;
-          
         });
-        
-        // Compute neightbors
-        for (var c_key in this.centers) {
-          var c = this.centers[c_key];
-          for (var e_key in c.edges) {
-            var e = c.edges[e_key];
-            for (var _c_key in e.centers) {
-              var _c = e.centers[_c_key];
-              
-              if (c.key() != _c.key()) c.neightbors[_c.key()] = _c;
-            }
-          }
-        }
-        
       }
     });
     
@@ -175,28 +181,22 @@ map.builder = function(canvas) {
       name:     'Draw edges',
       callback: function() {
         
-        var self = this;
-        
-        for (var e_k in this.edges) {
-          var e = this.edges[e_k]
-            , moved = false
-            ;
+        this.edges.each(function(e) {          
+          this.context.beginPath();
+          var moved = false;
           
-          self.context.beginPath();
-          
-          for (var k in e.corners) {
-            var c = e.corners[k];
+          e.corners.each(function(c) {
             if (!moved) {
-              self.context.moveTo(c.point.x, c.point.y);
-              moved = true;
+              this.context.moveTo(c.point.x, c.point.y);
             } else {
-              self.context.lineTo(c.point.x, c.point.y);
+              this.context.lineTo(c.point.x, c.point.y);
             }
-          }
+            moved = true;
+          }, this);
           
-          self.context.strokeStyle = 'black';
-          self.context.stroke();
-        }
+          this.context.strokeStyle = 'black';
+          this.context.stroke();
+        }, this);
         
       }
     });
@@ -204,57 +204,39 @@ map.builder = function(canvas) {
     steps.push({
       name:     'Draw neighborhood',
       callback: function() {
-        
-        var self = this;
-        
-        for (var k in this.centers) {
-          var c = this.centers[k];
-          
-          for (var nk in c.neightbors) {
-            var n = c.neightbors[nk];
-          
-            self.context.beginPath();
-            self.context.moveTo(c.point.x, c.point.y);
-            self.context.lineTo(n.point.x, n.point.y);
-            self.context.strokeStyle = 'grey';
-            self.context.stroke();
-          }
-        }
-        
+        this.centers.each(function(c) {
+          c.neighbors.each(function(n) {
+            this.context.beginPath();
+            this.context.moveTo(c.point.x, c.point.y);
+            this.context.lineTo(n.point.x, n.point.y);
+            this.context.strokeStyle = 'grey';
+            this.context.stroke();
+          }, this);
+        }, this);
       }
     });
     
     steps.push({
       name:     'Draw centers',
       callback: function() {
-        
-        var self = this;
-        
-        for (var k in this.centers) {
-          var c = this.centers[k];
-          
-          self.context.beginPath();
-          self.context.arc(c.point.x, c.point.y, 1, 0, 2 * Math.PI, true);
-          self.context.strokeStyle = 'blue';
-          self.context.stroke();
-        }
+        this.centers.each(function(c) {
+          this.context.beginPath();
+          this.context.arc(c.point.x, c.point.y, 1, 0, 2 * Math.PI, true);
+          this.context.strokeStyle = 'red';
+          this.context.stroke();
+        }, this);
       }
     });
     
     steps.push({
       name:     'Draw corners',
       callback: function() {
-        
-        var self = this;
-        
-        for (var k in this.corners) {
-          var c = this.corners[k];
-          
-          self.context.beginPath();
-          self.context.arc(c.point.x, c.point.y, 1, 0, 2 * Math.PI, true);
-          self.context.strokeStyle = 'red';
-          self.context.stroke();
-        }
+        this.corners.each(function(c) {
+          this.context.beginPath();
+          this.context.arc(c.point.x, c.point.y, 1, 0, 2 * Math.PI, true);
+          this.context.strokeStyle = 'blue';
+          this.context.stroke();
+        }, this);
       }
     });
     
