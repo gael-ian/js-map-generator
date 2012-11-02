@@ -208,8 +208,9 @@ map.builder = function(canvas) {
       callback: function() {          
         this.points = [];
         for (var i = 0, num_points = Math.round((this.width * this.height) / 500); i <= num_points; i++) {
-          var x = Math.floor(Math.random() * (this.width  - 10))
-            , y = Math.floor(Math.random() * (this.height - 10));
+          var x = Math.round(Math.random() * this.width)
+            , y = Math.round(Math.random() * this.height)
+            ;
             
           this.points.push(new map.graph.point(x, y));
         }
