@@ -321,7 +321,7 @@ map.builder = function(canvas) {
         
         var queue       = []
           , self        = this
-          , is_land     = this.island_builders('perlin')
+          , is_land     = this.island_builders('radial')
           ;
         
         this.centers.each(function(ce) {
@@ -335,17 +335,62 @@ map.builder = function(canvas) {
   };
   
   this.island_builders = function(strategy) {
+    
     var self = this;
+      
     switch(strategy) {
       case 'square':
         return function(location) {
           return !location.border(self);
         };
         
-      case 'perlin':
-        var perlin = new ClassicalNoise();
+      case 'circle':
+        var r_max = Math.min(self.height/2, self.width/2);
+        
         return function(location) {
-          return (perlin.noise(location.point.x / self.width, location.point.y / self.height, location.elevation, self.width) >= 0);
+          var circ_x = (location.point.x - self.width/2)
+            , circ_y = (location.point.y - self.height/2)
+            , r      = Math.sqrt((circ_x*circ_x) + (circ_y*circ_y)) / r_max
+            ;
+          return (r < 0.8);
+        };
+        
+      case 'radial':
+        var prng  = new PRNG();
+        
+        prng.seed = self.seed;
+        
+        var r_max    = [self.height/2, self.width/2][Math.round(prng.nextRange(0, 1))]
+          , bumps    = prng.nextRange(1, 6)
+          , start_a  = prng.nextRange(0, 2*Math.PI)
+          , start_b  = prng.nextRange(0, 2*Math.PI)
+          ;
+        
+        return function(location) {
+          var circ_x = (location.point.x - self.width/2)
+            , circ_y = (location.point.y - self.height/2)
+            , a      = Math.atan2(circ_y, circ_x)
+            , r      = Math.sqrt((circ_x*circ_x) + (circ_y*circ_y)) / r_max
+            , r1     = 0.4 + 0.30*Math.sin(start_a + a*bumps + Math.cos((bumps+3)*a))
+            , r2     = 0.7 + 0.25*Math.sin(start_b + a*bumps - Math.sin((bumps+3)*a))
+            ;
+          return (r < r1 || (r > r1 * 1.3 && r < r2));
+        };
+        
+      case 'perlin':
+        var bitmap  = new BitmapData(64, 64)
+          , coeff_x = (64 / self.width)
+          , coeff_y = (64 / self.height)
+          , diag    = Math.sqrt((self.height * self.height) + (self.width * self.width))
+          ;
+        bitmap.perlinNoise(32, 32, self.seed, BitmapDataChannel.BLUE, false);
+        
+        return function(location) {
+          var blue = (bitmap.getPixel(Math.round(location.point.x * coeff_x), Math.round(location.point.y * coeff_y)) / 255)
+            , dist_x = (location.point.x - self.width/2)
+            , dist_y = (location.point.y - self.height/2)
+            ;
+          return (blue > 0.3 + 0.3 * (Math.sqrt((dist_x*dist_x) + (dist_y*dist_y)) / diag) * (Math.sqrt((dist_x*dist_x) + (dist_y*dist_y)) / diag));
         };
         
       default:
@@ -402,7 +447,7 @@ map.drawer = function() {
             moved = true;
           }, this);
           this.context.closePath();
-          this.context.fillStyle = '#009999';
+          this.context.fillStyle = '#4D4A89';
           this.context.fill();
           
         }, this);
@@ -453,7 +498,7 @@ map.drawer = function() {
               this.context.beginPath();
               this.context.moveTo(c.point.x, c.point.y);
               this.context.lineTo(n.point.x, n.point.y);
-              this.context.strokeStyle = 'grey';
+              this.context.strokeStyle = '#894E57';
               this.context.stroke();
               
               if (!n.drawedNeighbors) {
@@ -485,7 +530,7 @@ map.drawer = function() {
         this.corners.each(function(c) {
           this.context.beginPath();
           this.context.arc(c.point.x, c.point.y, 1, 0, 2 * Math.PI, true);
-          this.context.strokeStyle = 'blue';
+          this.context.strokeStyle = '#525252';
           this.context.stroke();
         }, this);
       }
