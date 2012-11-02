@@ -72,9 +72,25 @@ map.core.stack = function() {
 map.core.stack.prototype = new Array();
 
 
+map.core.stack.prototype.removeBefore = function(name) {
+  var found = false;
+  this.forEach(function(step, i) {
+    if (step.name == name) found = true;
+    if (!found) delete this[i];
+  }, this);
+};
+
+map.core.stack.prototype.removeAfter = function(name) {
+  var found = false;
+  this.forEach(function(step, i) {
+    if (found) delete this[i];
+    if (step.name == name) found = true;
+  }, this);
+};
+
 map.core.stack.prototype.run = function(scope) {
   var begin = 0;
-  this.forEach(function(step) {
+  this.forEach(function(step, i) {
     begin = (new Date()).getTime();
     step.callback.apply(this);
     console.log(step.name + ': ' + ((new Date()).getTime() - begin) + 'ms');
@@ -423,8 +439,9 @@ map.drawer = function() {
   
   this.steps   = new map.core.stack();
       
-  this.clear = function() {
-    this.context.clearRect(0, 0, this.widht, this.height);
+  this.clear = function(builder) {
+    builder.context.fillStyle = "white";
+    builder.context.fillRect(0, 0, builder.width, builder.height);
   };
       
   this.defaultSteps = function() {
@@ -482,8 +499,9 @@ map.drawer = function() {
     steps.push({
       name:     'Draw neighborhood',
       callback: function() {
-        var queue = []
-          , self  = this
+        var queue      = []
+          , self       = this
+          , draw_time  = (new Date()).getTime()
           ;
         
         this.centers.each(function(c) {
@@ -494,7 +512,7 @@ map.drawer = function() {
         
         while(queue.length != 0) {
           var c = queue.shift();
-          if (!c.drawedNeighbors) {
+          if (c.drawedNeighbors != draw_time) {
             c.neighbors.each(function(n) {
               this.context.beginPath();
               this.context.moveTo(c.point.x, c.point.y);
@@ -502,12 +520,12 @@ map.drawer = function() {
               this.context.strokeStyle = '#894E57';
               this.context.stroke();
               
-              if (!n.drawedNeighbors) {
+              if (n.drawedNeighbors != draw_time) {
                 queue.push(n);
               }
             }, this);
             
-            c.drawedNeighbors = true;
+            c.drawedNeighbors = draw_time;
           }
         }
       }

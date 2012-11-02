@@ -7,10 +7,17 @@
       body     { margin: 0px; padding: 0px; }
       #wrapper { width: 960px; margin: 15px auto; }
       canvas   { border: 1px solid #000; margin: auto; }
+      ul       { list-style: none; margin: 5px 0; padding: 0; }
+      li       { display: inline-block; margin: 0 5px; padding: 0; }
     </style>
   </head>
   <body>
     <div id="wrapper">
+      <ul>
+        <li><a id="draw-graph" href="#">Graph</a></li>
+        <li><a id="draw-water" href="#">Water</a></li>
+        <li><a id="draw-full"  href="#">Full</a></li>
+      </ul>
       <canvas id="map" width="950" height="750"></canvas>
     </div>
     
@@ -23,12 +30,42 @@
     <script type="text/javascript" src="./javascripts/map.js"></script>
     <script type="text/javascript">
     
-      var canvas  = document.getElementById('map'),
-          builder = new map.builder(canvas),
-          drawer  = new map.drawer(builder);
+      var canvas        = document.getElementById('map')
+        , builder       = new map.builder(canvas)
+        
+        , water_drawer  = new map.drawer(builder)
+        , graph_drawer  = new map.drawer(builder)
+        , full_drawer   = new map.drawer(builder)
+        ;
       
       builder.build();
-      drawer.draw(builder);
+      
+      water_drawer.steps = water_drawer.defaultSteps();
+      water_drawer.steps.removeAfter('Draw water');
+      
+      graph_drawer.steps = graph_drawer.defaultSteps();
+      graph_drawer.steps.removeBefore('Draw edges');
+      graph_drawer.steps.removeAfter('Draw corners');
+      
+      document.getElementById('draw-water').addEventListener('click', function(e) {
+        e.preventDefault();
+        water_drawer.clear(builder);
+        water_drawer.draw(builder);
+      }, false);
+      
+      document.getElementById('draw-graph').addEventListener('click', function(e) {
+        e.preventDefault();
+        graph_drawer.clear(builder);
+        graph_drawer.draw(builder);
+      }, false);
+      
+      document.getElementById('draw-full').addEventListener('click', function(e) {
+        e.preventDefault();
+        full_drawer.clear(builder);
+        full_drawer.draw(builder);
+      }, false);
+      
+      full_drawer.draw(builder);
       
     </script>
   </body>
