@@ -15,13 +15,17 @@
     </div>
     
     <script type="text/javascript" src="./javascripts/voronoi.js"></script>
+    <script type="text/javascript" src="./javascripts/pm_prng.js"></script>
+    <script type="text/javascript" src="./javascripts/perlin.js"></script>
     <script type="text/javascript" src="./javascripts/map.js"></script>
     <script type="text/javascript">
     
       var canvas  = document.getElementById('map'),
-          m       = new map.builder(canvas);
-          
-      m.generate();
+          builder = new map.builder(canvas),
+          drawer  = new map.drawer(builder);
+      
+      builder.build();
+      drawer.draw(builder);
       
     </script>
   </body>
