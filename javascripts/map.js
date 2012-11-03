@@ -389,7 +389,7 @@ map.builder = function(canvas) {
             , a      = Math.atan2(circ_y, circ_x)
             , r      = Math.sqrt((circ_x*circ_x) + (circ_y*circ_y)) / r_max
             , r1     = 0.4 + 0.30*Math.sin(start_a + a*bumps + Math.cos((bumps+3)*a))
-            , r2     = 0.7 + 0.25*Math.sin(start_b + a*bumps - Math.sin((bumps+3)*a))
+            , r2     = 0.7 + 0.30*Math.sin(start_b + a*bumps - Math.sin((bumps+3)*a))
             ;
           return (r < r1 || (r > r1 * 1.3 && r < r2));
         };
