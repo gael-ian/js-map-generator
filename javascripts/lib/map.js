@@ -1,0 +1,5 @@
+map = {
+  core:  {},
+  graph: {},
+  utils: {}
+};
