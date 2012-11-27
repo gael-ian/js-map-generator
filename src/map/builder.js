@@ -86,45 +86,51 @@ map.builder = function(canvas) {
           , diagram = voronoi.compute(this.points, { xl: 0, xr: this.width, yt: 0, yb: this.height })
           ;
         
-        // Build centers
-        this.points.forEach(function(p) {
-          var c = new map.graph.center(new map.graph.point(Math.round(p.x), Math.round(p.y)));
-          this.centers[c.key()] = c;
-        }, this);
-        
         // Associates edges and corners
-        diagram.edges.forEach(function(e) {
+        diagram.edges.forEach(function(_e) {
           
-          var a_x     = Math.round(e.va.x)
-            , a_y     = Math.round(e.va.y)
-            , b_x     = Math.round(e.vb.x)
-            , b_y     = Math.round(e.vb.y)
+          var index   = null
+            , a_x     = Math.round(_e.va.x)
+            , a_y     = Math.round(_e.va.y)
+            , b_x     = Math.round(_e.vb.x)
+            , b_y     = Math.round(_e.vb.y)
             
-            , point = new map.graph.point(Math.round((a_x + b_x) / 2), Math.round((a_y + b_y) / 2))
-            , edge  = new map.graph.edge(point)
-            , ca    = (this.corners[map.utils.genKey(a_x, a_y)] || new map.graph.corner(new map.graph.point(a_x, a_y)))
-            , cb    = (this.corners[map.utils.genKey(b_x, b_y)] || new map.graph.corner(new map.graph.point(b_x, b_y)))
+            , e       = new map.graph.point(Math.round((a_x + b_x) / 2), Math.round((a_y + b_y) / 2))
+            , a       = new map.graph.point(a_x, a_y)
+            , b       = new map.graph.point(b_x, b_y)
+            
+            , edge    = new map.graph.edge(e)
+            , ca      = (this.corners[a.toString()] || new map.graph.corner(a))
+            , cb      = (this.corners[b.toString()] || new map.graph.corner(b))
             ;
           
-          ca.edges[edge.key()] = cb.edges[edge.key()] = edge;
+          ca.edges[edge.toString()] = edge;
+          cb.edges[edge.toString()] = edge;
           
-          edge.corners[ca.key()] = ca;
-          edge.corners[cb.key()] = cb;
+          edge.corners[ca.toString()] = ca;
+          edge.corners[cb.toString()] = cb;
           
-          [e.lSite, e.rSite].forEach(function(site) {
+          [_e.lSite, _e.rSite].forEach(function(site) {
             if (site) {
-              var c = this.centers[map.utils.genKey(Math.round(site.x), Math.round(site.y))];
+              var s    = new map.graph.point(Math.round(site.x), Math.round(site.y))
+                , c    = (this.centers[s.toString()] || new map.graph.center(s))
+                ;
+
+              this.centers[s.toString()] = c;
               
-              edge.centers[c.key()] = ca.centers[c.key()] = cb.centers[c.key()] = c;
-              c.edges[edge.key()] = edge;
-              c.corners[ca.key()] = ca;
-              c.corners[cb.key()] = cb;
+              edge.centers[c.toString()] = c;
+              ca.centers[c.toString()] = c;
+              cb.centers[c.toString()] = c;
+              
+              c.edges[edge.toString()] = edge;
+              c.corners[ca.toString()] = ca;
+              c.corners[cb.toString()] = cb;
             }
           }, this);
           
-          this.edges[edge.key()] = edge;
-          this.corners[ca.key()] = ca;
-          this.corners[cb.key()] = cb;
+          this.edges[edge.toString()] = edge;
+          this.corners[ca.toString()] = ca;
+          this.corners[cb.toString()] = cb;
           
         }, this);
         
@@ -132,7 +138,7 @@ map.builder = function(canvas) {
         this.centers.each(function(c) {
           c.edges.each(function (e) {
             e.centers.each(function(n) {
-              if (c.key() != n.key()) c.neighbors[n.key()] = n;
+              if (c.toString() != n.toString()) c.neighbors[n.toString()] = n;
             });
           });
         });
@@ -141,7 +147,7 @@ map.builder = function(canvas) {
         this.corners.each(function(c) {
           c.edges.each(function (e) {
             e.corners.each(function(a) {
-              if (c.key() != a.key()) c.adjacents[a.key()] = a;
+              if (c.toString() != a.toString()) c.adjacents[a.toString()] = a;
             });
           });
         });
@@ -170,22 +176,19 @@ map.builder = function(canvas) {
         // Separate ocean and lake
         this.centers.as_queue(function(c, queue, queued) {
           
-          c.ocean = c.ocean || (c.water && (c.border(self) || (null != c.neighbors.detect(function(n) { return n.ocean; }))));
+          c.ocean = c.ocean || (c.water && (c.border(self) || (null !== c.neighbors.detect(function(n) { return n.ocean; }))));
           
           c.neighbors.each(function(n) {
             if (0 > queued.indexOf(n) && 0 > queue.indexOf(n)) queue.push(n);
           });
           /*
           // In some edge case (near coast), we need a second pass.
-          if (c.neighbors.select(function(n) { return (0 > queued.indexOf(n)); }).length() > 0 && c.water && !c.ocean) {
+          if (c.neighbors.select(function(n) { return (0 > queued.indexOf(n)); }).length > 0 && c.water && !c.ocean) {
             queue.push(c);
             queued.splice(queued.indexOf(c), 1);
           }
           */
-        }, this, this.centers.select(function(c) { return c.border(self); }).reduce([], function(m, i) {
-          m.push(i);
-          return m;          
-        }));
+        }, this, this.centers.select(function(c) { return c.border(self); }).reduce([], function(m, i) { m.push(i); return m; }));
         
       }
     });

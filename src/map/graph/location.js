@@ -18,3 +18,7 @@ map.graph.location = function(point) {
 map.graph.location.prototype.key = function() {
   return map.utils.genKey(this.point.x, this.point.y);
 };
+
+map.graph.location.prototype.toString = function() {
+  return this.point.toString();
+};

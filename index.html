@@ -3,17 +3,16 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Random map generator</title>
-    <style>
-      body     { margin: 0px; padding: 0px; }
-      #wrapper { width: 960px; margin: 15px auto; }
-      canvas   { border: 1px solid #000; margin: auto; }
-      ul       { list-style: none; margin: 5px 0; padding: 0; }
-      li       { display: inline-block; margin: 0 5px; padding: 0; }
-    </style>
+
+    <link rel="shortcut icon" type="image/png" href="ui/images/globe.png">
+    
+    <link rel="stylesheet" type="text/css" href="ui/stylesheets/reset.css">
+    <link rel="stylesheet" type="text/css" href="ui/stylesheets/layout.css">
+    <link rel="stylesheet" type="text/css" href="ui/stylesheets/typo.css">
   </head>
   <body>
     <div id="wrapper">
-      <ul>
+      <ul class="tools">
         <li><a id="draw-graph" href="#">Graph</a></li>
         <li><a id="draw-water" href="#">Water</a></li>
         <li><a id="draw-full"  href="#">Full</a></li>
@@ -22,25 +21,25 @@
     </div>
     
     <!-- External libraries -->
-    <script type="text/javascript" src="./javascripts/vendor/voronoi.js"></script>
-    <script type="text/javascript" src="./javascripts/vendor/bitmap-data/Point.js"></script>
-    <script type="text/javascript" src="./javascripts/vendor/bitmap-data/Rectangle.js"></script>
-    <script type="text/javascript" src="./javascripts/vendor/bitmap-data/Matrix.js"></script>
-    <script type="text/javascript" src="./javascripts/vendor/bitmap-data/Simplex.js"></script>
-    <script type="text/javascript" src="./javascripts/vendor/bitmap-data/BitmapData.js"></script>
+    <script type="text/javascript" src="./lib/voronoi.js"></script>
+    <script type="text/javascript" src="./lib/bitmap-data/Point.js"></script>
+    <script type="text/javascript" src="./lib/bitmap-data/Rectangle.js"></script>
+    <script type="text/javascript" src="./lib/bitmap-data/Matrix.js"></script>
+    <script type="text/javascript" src="./lib/bitmap-data/Simplex.js"></script>
+    <script type="text/javascript" src="./lib/bitmap-data/BitmapData.js"></script>
     
-    <!-- Map -->    
-    <script type="text/javascript" src="./javascripts/lib/map.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/utils.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/core/dictionnary.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/core/stack.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/graph/point.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/graph/location.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/graph/corner.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/graph/center.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/graph/edge.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/builder.js"></script>
-    <script type="text/javascript" src="./javascripts/lib/map/drawer.js"></script>
+    <!-- Map -->
+    <script type="text/javascript" src="./src/map.js"></script>
+    <script type="text/javascript" src="./src/map/utils.js"></script>
+    <script type="text/javascript" src="./src/map/core/dictionnary.js"></script>
+    <script type="text/javascript" src="./src/map/core/stack.js"></script>
+    <script type="text/javascript" src="./src/map/graph/point.js"></script>
+    <script type="text/javascript" src="./src/map/graph/location.js"></script>
+    <script type="text/javascript" src="./src/map/graph/corner.js"></script>
+    <script type="text/javascript" src="./src/map/graph/center.js"></script>
+    <script type="text/javascript" src="./src/map/graph/edge.js"></script>
+    <script type="text/javascript" src="./src/map/builder.js"></script>
+    <script type="text/javascript" src="./src/map/drawer.js"></script>
     
     <script type="text/javascript">
     

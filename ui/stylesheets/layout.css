@@ -1,0 +1,4 @@
+#wrapper  { width: 960px; margin: 15px auto; }
+canvas    { border: 1px solid #000; margin: auto; }
+.tools    { list-style: none; margin: 5px 0; padding: 0; }
+.tools li { display: inline-block; margin: 0 5px; padding: 0; }
