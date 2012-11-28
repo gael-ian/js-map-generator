@@ -160,7 +160,7 @@ map.builder = function(canvas) {
         
         var queue       = []
           , self        = this
-          , is_land     = this.island_builders('perlin')
+          , is_land     = this.island_builders('radial')
           ;
         
         // Assign water to corners
@@ -176,19 +176,13 @@ map.builder = function(canvas) {
         // Separate ocean and lake
         this.centers.as_queue(function(c, queue, queued) {
           
-          c.ocean = c.ocean || (c.water && (c.border(self) || (null !== c.neighbors.detect(function(n) { return n.ocean; }))));
+          c.ocean = true;
           
           c.neighbors.each(function(n) {
-            if (0 > queued.indexOf(n) && 0 > queue.indexOf(n)) queue.push(n);
+            if (0 > queued.indexOf(n) && 0 > queue.indexOf(n) && c.water) queue.push(n);
           });
-          /*
-          // In some edge case (near coast), we need a second pass.
-          if (c.neighbors.select(function(n) { return (0 > queued.indexOf(n)); }).length > 0 && c.water && !c.ocean) {
-            queue.push(c);
-            queued.splice(queued.indexOf(c), 1);
-          }
-          */
-        }, this, this.centers.select(function(c) { return c.border(self); }).reduce([], function(m, i) { m.push(i); return m; }));
+          
+        }, this, this.centers.select(function(c) { return (c.border(self) && c.water); }).reduce([], function(m, i) { m.push(i); return m; }));
         
       }
     });
