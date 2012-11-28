@@ -1,5 +1,8 @@
 map = {
+  utils: {},
   core:  {},
   graph: {},
-  utils: {}
+  build: {
+    shape : {}
+  }
 };

@@ -30,14 +30,23 @@
     
     <!-- Map -->
     <script type="text/javascript" src="./src/map.js"></script>
+    
     <script type="text/javascript" src="./src/map/utils.js"></script>
+    
     <script type="text/javascript" src="./src/map/core/dictionnary.js"></script>
     <script type="text/javascript" src="./src/map/core/stack.js"></script>
+    
     <script type="text/javascript" src="./src/map/graph/point.js"></script>
     <script type="text/javascript" src="./src/map/graph/location.js"></script>
     <script type="text/javascript" src="./src/map/graph/corner.js"></script>
     <script type="text/javascript" src="./src/map/graph/center.js"></script>
     <script type="text/javascript" src="./src/map/graph/edge.js"></script>
+    
+    <script type="text/javascript" src="./src/map/build/shape/square.js"></script>
+    <script type="text/javascript" src="./src/map/build/shape/circle.js"></script>
+    <script type="text/javascript" src="./src/map/build/shape/radial.js"></script>
+    <script type="text/javascript" src="./src/map/build/shape/perlin.js"></script>
+    
     <script type="text/javascript" src="./src/map/builder.js"></script>
     <script type="text/javascript" src="./src/map/drawer.js"></script>
     
@@ -50,6 +59,9 @@
         , graph_drawer  = new map.drawer(builder)
         , full_drawer   = new map.drawer(builder)
         ;
+
+      // Setup builder
+      builder.setShape(map.build.shape.perlin);
       
       builder.build();
       

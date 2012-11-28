@@ -12,17 +12,5 @@ map.graph.corner = function(point) {
 map.graph.corner.prototype = new map.graph.location();
   
 map.graph.corner.prototype.border = function(context) {
-  if (this.point.x == 0) {
-    return true;
-  }
-  if (this.point.y == 0) {
-    return true;
-  }
-  if (this.point.x == context.width) {
-    return true;
-  }
-  if (this.point.y == context.height) {
-    return true;
-  }
   return (this.point.x == 0 || this.point.y == 0 || this.point.x == context.width || this.point.y == context.height)
 };

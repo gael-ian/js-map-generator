@@ -14,6 +14,16 @@ map.graph.point.prototype.toString = function() {
   return this._s;
 };
 
-map.graph.point.prototype.length = function() {
-  return Math.sqrt(this.x*this.x + this.y*this.y);
+map.graph.point.prototype.distanceFrom = function(point) {
+  var x = (this.x - point.x)
+    , y = (this.y - point.y)
+    ;
+  return Math.sqrt(x*x + y*y);
+};
+
+map.graph.point.prototype.radiantFrom = function(point) {
+  var x = (this.x - point.x)
+    , y = (this.y - point.y)
+    ;
+  return Math.atan2(y, x);
 };
