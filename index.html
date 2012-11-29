@@ -58,10 +58,13 @@
     
       var canvas        = document.getElementById('map')
         , builder       = new map.builder(canvas)
-        
-        , water_drawer  = new map.drawer(canvas)
-        , graph_drawer  = new map.drawer(canvas)
-        , full_drawer   = new map.drawer(canvas)
+        , drawer        = new map.drawer(canvas)
+
+        , steps = {
+            full:  drawer.defaultSteps()
+          , water: drawer.defaultSteps()
+          , graph: drawer.defaultSteps()
+        }
         ;
 
       // Setup builder
@@ -69,32 +72,21 @@
       
       builder.build();
       
-      water_drawer.steps = water_drawer.defaultSteps();
-      water_drawer.steps.removeAfter('Draw water');
+      steps['water'].removeAfter('Draw water');
       
-      graph_drawer.steps = graph_drawer.defaultSteps();
-      graph_drawer.steps.removeBefore('Draw edges');
-      graph_drawer.steps.removeAfter('Draw corners');
+      steps['graph'].removeBefore('Draw edges');
+      steps['graph'].removeAfter('Draw corners');
+
+      ['water', 'graph', 'full'].forEach(function(layer) {
+        document.getElementById('draw-' + layer).addEventListener('click', function(e) {
+          e.preventDefault();
+          drawer.clear();
+          drawer.steps = steps[layer];
+          drawer.draw(builder);
+        }, false);
+      });
       
-      document.getElementById('draw-water').addEventListener('click', function(e) {
-        e.preventDefault();
-        water_drawer.clear();
-        water_drawer.draw(builder);
-      }, false);
-      
-      document.getElementById('draw-graph').addEventListener('click', function(e) {
-        e.preventDefault();
-        graph_drawer.clear();
-        graph_drawer.draw(builder);
-      }, false);
-      
-      document.getElementById('draw-full').addEventListener('click', function(e) {
-        e.preventDefault();
-        full_drawer.clear();
-        full_drawer.draw(builder);
-      }, false);
-      
-      full_drawer.draw(builder);
+      drawer.draw(builder);
       
     </script>
   </body>
