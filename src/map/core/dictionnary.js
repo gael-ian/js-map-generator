@@ -59,7 +59,7 @@ map.core.dictionary.prototype.reduce = function(source, callback, scope) {
   return source;
 };
 
-map.core.dictionary.prototype.as_queue = function(callback, scope, queue) {
+map.core.dictionary.prototype.asQueue = function(callback, scope, queue) {
   var queue  = queue || []
     , queued = []
     , keys   = Object.keys(this);

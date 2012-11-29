@@ -13,7 +13,7 @@ map.build.shape.radial = function(builder, options) {
   this._start_a    = this._prng.nextRange(0, 2 * Math.PI);
   this._start_b    = this._prng.nextRange(0, 2 * Math.PI);
 
-  this.is_land  = function(location) {
+  this.isLand  = function(location) {
     var a      = location.point.radiantFrom(this.builder.center)
       , r      = location.point.distanceFrom(this.builder.center) / this._max_radius
       , r1     = 0.4 + 0.30*Math.sin(this._start_a + a*this._bumps + Math.cos((this._bumps+3)*a))

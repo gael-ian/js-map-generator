@@ -16,7 +16,7 @@ map.build.shape.perlin = function(builder, options) {
   
   this._bitmap.perlinNoise(this.options.base_x, this.options.base_y, this.options.seed, BitmapDataChannel.BLUE, false);
 
-  this.is_land  = function(location) {
+  this.isLand  = function(location) {
     var blue   = (this._bitmap.getPixel(Math.round(location.point.x * this._x_coeff), Math.round(location.point.y * this._y_coeff)) / 255)
       , d      = location.point.distanceFrom(this.builder.center)
       ;

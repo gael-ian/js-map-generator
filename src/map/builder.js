@@ -180,11 +180,11 @@ map.builder.prototype.defaultSteps = function() {
 
       // Assign water to corners
       this.centers.each(function(c) {
-        c.water = !this.shape.is_land(c);
+        c.water = !this.shape.isLand(c);
       }, this);
 
       // Separate ocean and lake
-      this.centers.as_queue(function(c, queue, queued) {
+      this.centers.asQueue(function(c, queue, queued) {
 
         c.ocean = true;
 

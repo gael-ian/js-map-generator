@@ -96,7 +96,7 @@ map.drawer.prototype.defaultSteps = function() {
         , draw_time  = (new Date()).getTime()
         ;
 
-      this.centers.as_queue(function(c, queue, queued) {
+      this.centers.asQueue(function(c, queue, queued) {
         c.neighbors.each(function(n) {
           context.beginPath();
           context.moveTo(c.point.x, c.point.y);
