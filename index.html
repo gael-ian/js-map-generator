@@ -59,9 +59,9 @@
       var canvas        = document.getElementById('map')
         , builder       = new map.builder(canvas)
         
-        , water_drawer  = new map.drawer(builder)
-        , graph_drawer  = new map.drawer(builder)
-        , full_drawer   = new map.drawer(builder)
+        , water_drawer  = new map.drawer(canvas)
+        , graph_drawer  = new map.drawer(canvas)
+        , full_drawer   = new map.drawer(canvas)
         ;
 
       // Setup builder
@@ -78,19 +78,19 @@
       
       document.getElementById('draw-water').addEventListener('click', function(e) {
         e.preventDefault();
-        water_drawer.clear(builder);
+        water_drawer.clear();
         water_drawer.draw(builder);
       }, false);
       
       document.getElementById('draw-graph').addEventListener('click', function(e) {
         e.preventDefault();
-        graph_drawer.clear(builder);
+        graph_drawer.clear();
         graph_drawer.draw(builder);
       }, false);
       
       document.getElementById('draw-full').addEventListener('click', function(e) {
         e.preventDefault();
-        full_drawer.clear(builder);
+        full_drawer.clear();
         full_drawer.draw(builder);
       }, false);
       

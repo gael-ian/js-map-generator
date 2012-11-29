@@ -24,11 +24,15 @@ map.core.stack.prototype.removeAfter = function(name) {
   }, this);
 };
 
-map.core.stack.prototype.run = function(scope) {
-  var begin = 0;
+map.core.stack.prototype.run = function() {
+  var begin = 0
+    , args  = Array.prototype.slice.call(arguments)
+    , scope = args.shift()
+    ;
+    
   this.forEach(function(step, i) {
     begin = (new Date()).getTime();
-    step.callback.apply(this);
+    step.callback.apply(this, args);
     console.log(step.name + ': ' + ((new Date()).getTime() - begin) + 'ms');
   }, scope);
 };

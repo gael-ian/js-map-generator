@@ -7,7 +7,7 @@ map.builder = function(canvas) {
   this.shape = null;
   this.steps = new map.core.stack();
 
-  this.setContext(canvas);
+  this.setCanvas(canvas);
 };
 
 map.builder.prototype.reset = function() {
@@ -18,9 +18,9 @@ map.builder.prototype.reset = function() {
   this.corners = new map.core.dictionary();
 };
 
-map.builder.prototype.setContext   = function(canvas) {
+map.builder.prototype.setCanvas = function(canvas) {
 
-  this.context = canvas.getContext('2d');
+  this.canvas  = canvas;
 
   this.width   = canvas.clientWidth;
   this.height  = canvas.clientHeight;
@@ -33,7 +33,7 @@ map.builder.prototype.setContext   = function(canvas) {
   this.reset();
 };
 
-map.builder.prototype.setShape     = function(shape_class, shape_options) {
+map.builder.prototype.setShape = function(shape_class, shape_options) {
   this.shape = new shape_class(this, shape_options);
 };
 
