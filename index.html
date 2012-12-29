@@ -16,7 +16,7 @@
     
       <ul id="layers">
         <li><a id="draw-graph" href="#">Graph</a></li>
-        <li><a id="draw-water" href="#">Water</a></li>
+        <li><a id="draw-biomes" href="#">Biomes</a></li>
         <li><a id="draw-full"  href="#">Full</a></li>
       </ul>
       
@@ -50,6 +50,26 @@
     <script type="text/javascript" src="./src/map/build/shape/circle.js"></script>
     <script type="text/javascript" src="./src/map/build/shape/radial.js"></script>
     <script type="text/javascript" src="./src/map/build/shape/perlin.js"></script>
+
+    <script type="text/javascript" src="./src/map/build/biome/archtype/base.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/archtype/coastal.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/archtype/montane.js"></script>
+
+    <script type="text/javascript" src="./src/map/build/biome/desert.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/flooded_grassland.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/mangrove.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/mediterranean_forest.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/montane_grassland.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/taiga.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/temperate_broadleaf_forest.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/temperate_coniferous_forest.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/temperate_grassland.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/tropical_broadleaf_forest.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/tropical_coniferous_forest.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/tropical_grassland.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/tropical_rainforest.js"></script>
+    <script type="text/javascript" src="./src/map/build/biome/tundra.js"></script>
+    
     
     <script type="text/javascript" src="./src/map/builder.js"></script>
     <script type="text/javascript" src="./src/map/drawer.js"></script>
@@ -61,9 +81,9 @@
         , drawer        = new map.drawer(canvas)
 
         , steps = {
-            full:  drawer.defaultSteps()
-          , water: drawer.defaultSteps()
-          , graph: drawer.defaultSteps()
+            full:   drawer.defaultSteps()
+          , biomes: drawer.defaultSteps()
+          , graph:  drawer.defaultSteps()
         }
         ;
 
@@ -72,12 +92,12 @@
       
       builder.build();
       
-      steps['water'].removeAfter('Draw water');
+      steps['biomes'].removeAfter('Draw biomes');
       
       steps['graph'].removeBefore('Draw edges');
       steps['graph'].removeAfter('Draw corners');
 
-      ['water', 'graph', 'full'].forEach(function(layer) {
+      ['biomes', 'graph', 'full'].forEach(function(layer) {
         document.getElementById('draw-' + layer).addEventListener('click', function(e) {
           e.preventDefault();
           drawer.clear();
@@ -86,6 +106,7 @@
         }, false);
       });
       
+      drawer.steps = steps['biomes'];
       drawer.draw(builder);
       
     </script>

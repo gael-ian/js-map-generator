@@ -12,3 +12,8 @@ map.utils.merge = function(a, b) {
   }
   return a;
 };
+
+map.utils.shuffle = function(o) {
+    for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
+};

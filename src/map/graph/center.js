@@ -12,14 +12,9 @@ map.graph.center = function(point) {
 };
 map.graph.center.prototype = new map.graph.location();
   
-map.graph.center.prototype.border = function(context) {
+map.graph.center.prototype.border = function() {
   if (undefined === this._border) {
-    this._border = false;
-    this.corners.each(function(c) {
-      if (c.border(context)) {
-        this._border = true;
-      }
-    }, this);
+    this._border = (null !== this.corners.detect(function(c) { return c.border() }));
   }
   return this._border;
 };

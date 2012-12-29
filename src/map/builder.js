@@ -4,13 +4,42 @@
  */
 map.builder = function(canvas) {
   
-  this.shape = null;
+  this.shape  = null;
+  this.biomes = new map.core.dictionary();
+
+  [
+      'desert'
+    , 'flooded_grassland'
+    , 'mangrove'
+    , 'mediterranean_forest'
+    , 'montane_grassland'
+    , 'taiga'
+    , 'temperate_broadleaf_forest'
+    , 'temperate_coniferous_forest'
+    , 'temperate_grassland'
+    , 'tropical_broadleaf_forest'
+    , 'tropical_coniferous_forest'
+    , 'tropical_grassland'
+    , 'tropical_rainforest'
+    , 'tundra'
+  ].forEach(function(name) {
+    this.biomes[name] = new map.build.biome[name]();
+  }, this);
+
+  this.max_latitude  =  90;
+  this.min_latitude  = -90;
+
+  this.max_longitude =  90;
+  this.min_longitude = -90;
+  
   this.steps = new map.core.stack();
 
   this.setCanvas(canvas);
 };
 
 map.builder.prototype.reset = function() {
+
+  this.center  = null;
   this.points  = [];
 
   this.centers = new map.core.dictionary();
@@ -25,17 +54,26 @@ map.builder.prototype.setCanvas = function(canvas) {
   this.width   = canvas.clientWidth;
   this.height  = canvas.clientHeight;
 
-  this.shorter_dimension = Math.min(this.height, this.width);
-  this.larger_dimension  = Math.max(this.height, this.width);
-
-  this.center  = new map.graph.point(Math.round(this.width/2), Math.round(this.height/2));
-
   this.reset();
 };
 
 map.builder.prototype.setShape = function(shape_class, shape_options) {
   this.shape = new shape_class(this, shape_options);
 };
+
+['min_latitude', 'max_latitude', 'min_longitude', 'max_longitude'].forEach(function(name) {
+  var camelized_name = name.replace (/(?:^|[-_])(\w)/g, function (_, c) {
+    return c ? c.toUpperCase () : '';
+  });
+  
+  map.builder.prototype['set' + camelized_name] = function(limit) {
+    limit = parseInt(limit, 10);
+    if (limit > 90 || limit < -90) {
+      throw new RangeError('Invalid limit');
+    }
+    this[name] = limit;
+  };
+});
 
 map.builder.prototype.build = function() {
   if (this.steps.length == 0) {
@@ -49,10 +87,23 @@ map.builder.prototype.defaultSteps = function() {
   var steps = new map.core.stack();
 
   steps.push({
+    name:     'Set center',
+    callback: function() {
+      var x = Math.round((this.max_longitude * -1) / ((this.min_longitude - this.max_longitude) / this.width))
+        , y = Math.round((this.max_latitude * -1) / ((this.min_latitude - this.max_latitude) / this.height))
+        ;
+      this.center = new map.graph.point(x, y);
+
+      this.shorter_dimension = (x > y ? y : x) * 2;
+      this.larger_dimension  = (x > y ? x : y) * 2;
+    }
+  });
+
+  steps.push({
     name:     'Generate random points',
     callback: function() {
       this.points = [];
-      for (var i = 0, num_points = Math.round((this.width * this.height) / 500); i <= num_points; i++) {
+      for (var i = 0, num_points = Math.round((this.width * this.height) / 250); i <= num_points; i++) {
         var x = Math.round(Math.random() * this.width)
           , y = Math.round(Math.random() * this.height)
           ;
@@ -113,9 +164,9 @@ map.builder.prototype.defaultSteps = function() {
           , b_x     = Math.round(_e.vb.x)
           , b_y     = Math.round(_e.vb.y)
 
-          , e       = new map.graph.point(Math.round((a_x + b_x) / 2), Math.round((a_y + b_y) / 2))
-          , a       = new map.graph.point(a_x, a_y)
-          , b       = new map.graph.point(b_x, b_y)
+          , e       = new map.graph.point(Math.round((a_x + b_x) / 2), Math.round((a_y + b_y) / 2), this)
+          , a       = new map.graph.point(a_x, a_y, this)
+          , b       = new map.graph.point(b_x, b_y, this)
 
           , edge    = new map.graph.edge(e)
           , ca      = (this.corners[a.toString()] || new map.graph.corner(a))
@@ -130,7 +181,7 @@ map.builder.prototype.defaultSteps = function() {
 
         [_e.lSite, _e.rSite].forEach(function(site) {
           if (site) {
-            var s    = new map.graph.point(Math.round(site.x), Math.round(site.y))
+            var s    = new map.graph.point(Math.round(site.x), Math.round(site.y), this)
               , c    = (this.centers[s.toString()] || new map.graph.center(s))
               ;
 
@@ -178,22 +229,59 @@ map.builder.prototype.defaultSteps = function() {
 
       var self = this;
 
-      // Assign water to corners
-      this.centers.each(function(c) {
+      // Assign water
+      this.corners.each(function(c) {
         c.water = !this.shape.isLand(c);
+      }, this);
+      
+      this.centers.each(function(c) {
+        c.water = !c.corners.detect(function(co) { return !co.water });
       }, this);
 
       // Separate ocean and lake
       this.centers.asQueue(function(c, queue, queued) {
-
         c.ocean = true;
-
         c.neighbors.each(function(n) {
-          if (0 > queued.indexOf(n) && 0 > queue.indexOf(n) && c.water) queue.push(n);
+          if (0 > queued.indexOf(n) && 0 > queue.indexOf(n) && n.water) queue.push(n);
         });
+      }, this, this.centers.select(function(c) { return (c.border() && c.water); }).toArray());
 
-      }, this, this.centers.select(function(c) { return (c.border(self) && c.water); }).reduce([], function(m, i) { m.push(i); return m; }));
+      // Assign coast
+      this.centers.asQueue(function(c, queue, queued) {
+        c.neighbors.each(function(n) {
+          if (!n.water) n.coast = true;
+          if (0 > queued.indexOf(n) && 0 > queue.indexOf(n) && n.water) queue.push(n);
+        });
+      }, this, this.centers.select(function(c) { return c.ocean; }).toArray());
 
+    }
+  });
+
+  steps.push({
+    name:     'Assign biomes',
+    callback: function() {
+
+      var self = this;
+
+      // Assign biomes
+      this.centers.asQueue(function(c, queue, queued) {
+
+        var biomes = this.biomes.select(function(b) { return b.include(c); }).keys().reduce(function(memo, name) {
+            for(var i = 0, f = self.biomes[name].frequency; i < f; i++) { memo.push(name); }
+            return memo;
+          }, []);
+        c.neighbors.each(function(n) {
+          if (undefined != n.biome) {
+            for(var i = 0, r = self.biomes[n.biome].remanence; i < r; i++) { biomes.push(n.biome); }
+          }
+        }, this);
+
+        c.biome = biomes[Math.floor(Math.random() * biomes.length)];
+        
+        c.neighbors.each(function(n) {
+          if (0 > queued.indexOf(n) && 0 > queue.indexOf(n) && !n.water) queue.push(n);
+        });
+      }, this, this.centers.select(function(c) { return c.coast; }).reduce([], function(m, i) { m.push(i); return m; }));
     }
   });
 

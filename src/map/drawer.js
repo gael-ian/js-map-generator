@@ -63,6 +63,93 @@ map.drawer.prototype.defaultSteps = function() {
   });
 
   steps.push({
+    name:     'Draw biomes',
+    callback: function() {
+      var context = arguments[0];
+
+      this.centers.each(function(c) {
+        if (c.water) return;
+
+        var moved = false;
+        c.corners.clockwise(function(co, i) {
+          if (!moved) {
+            context.beginPath();
+            context.moveTo(co.point.x, co.point.y);
+          } else {
+            context.lineTo(co.point.x, co.point.y);
+          }
+          moved = true;
+        }, this);
+        context.closePath();
+
+        switch (c.biome) {
+          case 'desert':
+            context.fillStyle = '#FFF6D5';
+            break;
+
+          case 'flooded_grassland':
+            context.fillStyle = '#80B3FF';
+            break;
+
+          case 'mangrove':
+            context.fillStyle = '#D400AA';
+            break;
+
+          case 'mediterranean_forest':
+            context.fillStyle = '#C87137';
+            break;
+
+          case 'montane_grassland':
+            context.fillStyle = '#C6AFE9';
+            break;
+
+          case 'taiga':
+            context.fillStyle = '#2CA05A';
+            break;
+
+          case 'temperate_broadleaf_forest':
+            context.fillStyle = '#71C837';
+            break;
+
+          case 'temperate_coniferous_forest':
+            context.fillStyle = '#005500';
+            break;
+
+          case 'temperate_grassland':
+            context.fillStyle = '#CDDE87';
+            break;
+
+          case 'tropical_broadleaf_forest':
+            context.fillStyle = '#D4AA00';
+            break;
+
+          case 'tropical_coniferous_forest':
+            context.fillStyle = '#66FF00';
+            break;
+
+          case 'tropical_grassland':
+            context.fillStyle = '#FFDD55';
+            break;
+
+          case 'tropical_rainforest':
+            context.fillStyle = '#447821';
+            break;
+
+          case 'tundra':
+            context.fillStyle = '#87DECD';
+            break;
+
+          default:
+            context.fillStyle = '#FFFFFF';
+            break;
+        }
+        context.fill();
+
+      }, this);
+    }
+  });
+
+  steps.push({
     name:     'Draw edges',
     callback: function() {
       var context = arguments[0];

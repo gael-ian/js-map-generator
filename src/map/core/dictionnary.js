@@ -11,9 +11,13 @@ map.core.dictionary.prototype.length = function() {
   return Object.keys(this).length;
 };
 
+map.core.dictionary.prototype.keys = function() {
+  return Object.keys(this);
+};
+
 map.core.dictionary.prototype.each = function(iterator, scope) {
   var keys  = Object.keys(this)
-    , scope = (scope ||this)
+    , scope = (scope || this)
     ;
 
   for(var i in keys){
@@ -24,7 +28,7 @@ map.core.dictionary.prototype.each = function(iterator, scope) {
 map.core.dictionary.prototype.select = function(matcher, scope) {
   var o     = new map.core.dictionary()
     , keys  = Object.keys(this)
-    , scope = (scope ||this)
+    , scope = (scope || this)
     ;
 
   for(var i in keys) {
@@ -37,7 +41,7 @@ map.core.dictionary.prototype.select = function(matcher, scope) {
 
 map.core.dictionary.prototype.detect = function(matcher, scope) {
   var keys  = Object.keys(this)
-    , scope = (scope ||this)
+    , scope = (scope || this)
     ;
 
   for(var i in keys) {
@@ -50,13 +54,17 @@ map.core.dictionary.prototype.detect = function(matcher, scope) {
 
 map.core.dictionary.prototype.reduce = function(source, callback, scope) {
   var keys  = Object.keys(this)
-    , scope = (scope ||this)
+    , scope = (scope || this)
     ;
 
   for(var i in keys) {
     source = callback.call(scope, source, this[keys[i]]);
   }
   return source;
+};
+
+map.core.dictionary.prototype.toArray = function() {
+  return this.reduce([], function(m, i) { m.push(i); return m; });
 };
 
 map.core.dictionary.prototype.asQueue = function(callback, scope, queue) {
