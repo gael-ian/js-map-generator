@@ -44,7 +44,9 @@ map.drawer.prototype.defaultSteps = function() {
       this.centers.each(function(c) {
         if (!c.water) return;
 
-        var moved = false;
+        var moved = false
+          , color = (c.ocean ? '#4D4A89' : '#4D86CC')
+          ;
         c.corners.clockwise(function(co, i) {
           if (!moved) {
             context.beginPath();
@@ -55,7 +57,10 @@ map.drawer.prototype.defaultSteps = function() {
           moved = true;
         }, this);
         context.closePath();
-        context.fillStyle =  (c.ocean ? '#4D4A89' : '#4D86CC');
+        
+        context.strokeStyle = color;
+        context.fillStyle   = color;
+        context.stroke();
         context.fill();
 
       }, this);
@@ -70,7 +75,9 @@ map.drawer.prototype.defaultSteps = function() {
       this.centers.each(function(c) {
         if (c.water) return;
 
-        var moved = false;
+        var moved = false
+          , color = '#FFFFFF'
+          ;
         c.corners.clockwise(function(co, i) {
           if (!moved) {
             context.beginPath();
@@ -84,65 +91,68 @@ map.drawer.prototype.defaultSteps = function() {
 
         switch (c.biome) {
           case 'desert':
-            context.fillStyle = '#FFF6D5';
+            color = '#E0CD8B';
             break;
 
           case 'flooded_grassland':
-            context.fillStyle = '#80B3FF';
+            color = '#80B3FF';
             break;
 
           case 'mangrove':
-            context.fillStyle = '#D400AA';
+            color = '#D400AA';
             break;
 
           case 'mediterranean_forest':
-            context.fillStyle = '#C87137';
+            color = '#C87137';
             break;
 
           case 'montane_grassland':
-            context.fillStyle = '#C6AFE9';
+            color = '#C6AFE9';
             break;
 
           case 'taiga':
-            context.fillStyle = '#2CA05A';
+            color = '#2CA05A';
             break;
 
           case 'temperate_broadleaf_forest':
-            context.fillStyle = '#71C837';
+            color = '#71C837';
             break;
 
           case 'temperate_coniferous_forest':
-            context.fillStyle = '#005500';
+            color = '#005500';
             break;
 
           case 'temperate_grassland':
-            context.fillStyle = '#CDDE87';
+            color = '#CDDE87';
             break;
 
           case 'tropical_broadleaf_forest':
-            context.fillStyle = '#D4AA00';
+            color = '#D4AA00';
             break;
 
           case 'tropical_coniferous_forest':
-            context.fillStyle = '#66FF00';
+            color = '#66FF00';
             break;
 
           case 'tropical_grassland':
-            context.fillStyle = '#FFDD55';
+            color = '#FFDD55';
             break;
 
           case 'tropical_rainforest':
-            context.fillStyle = '#447821';
+            color = '#447821';
             break;
 
           case 'tundra':
-            context.fillStyle = '#87DECD';
+            color = '#87DECD';
             break;
 
           default:
-            context.fillStyle = '#FFFFFF';
+            color = '#FFFFFF';
             break;
         }
+        context.strokeStyle = color;
+        context.fillStyle   = color;
+        context.stroke();
         context.fill();
 
       }, this);
