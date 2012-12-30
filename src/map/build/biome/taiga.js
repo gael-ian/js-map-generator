@@ -5,8 +5,8 @@ map.build.biome.taiga = function() {
   this.min_latitude = 45;
   this.max_latitude = 70;
 
-  this.frequency    = 40;
-  this.remanence    = 19;
+  this.frequency    = 20;
+  this.remanence    = 39;
   
 };
 

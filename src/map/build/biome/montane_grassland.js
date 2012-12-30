@@ -5,8 +5,8 @@ map.build.biome.montane_grassland = function() {
   this.min_latitude = 0;
   this.max_latitude = 55;
 
-  this.frequency    = 2;
-  this.remanence    = 5;
+  this.frequency    = 5;
+  this.remanence    = 2;
   
 };
 

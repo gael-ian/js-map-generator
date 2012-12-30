@@ -103,7 +103,7 @@ map.builder.prototype.defaultSteps = function() {
     name:     'Generate random points',
     callback: function() {
       this.points = [];
-      for (var i = 0, num_points = Math.round((this.width * this.height) / 250); i <= num_points; i++) {
+      for (var i = 0, num_points = Math.round((this.width * this.height) / 200); i <= num_points; i++) {
         var x = Math.round(Math.random() * this.width)
           , y = Math.round(Math.random() * this.height)
           ;
@@ -271,7 +271,7 @@ map.builder.prototype.defaultSteps = function() {
             return memo;
           }, []);
         c.neighbors.each(function(n) {
-          if (undefined != n.biome) {
+          if (undefined != n.biome && self.biomes[n.biome].tolerate(c)) {
             for(var i = 0, r = self.biomes[n.biome].remanence; i < r; i++) { biomes.push(n.biome); }
           }
         }, this);
@@ -281,7 +281,7 @@ map.builder.prototype.defaultSteps = function() {
         c.neighbors.each(function(n) {
           if (0 > queued.indexOf(n) && 0 > queue.indexOf(n) && !n.water) queue.push(n);
         });
-      }, this, this.centers.select(function(c) { return c.coast; }).reduce([], function(m, i) { m.push(i); return m; }));
+      }, this, this.centers.select(function(c) { return c.coast; }).toArray());
     }
   });
 

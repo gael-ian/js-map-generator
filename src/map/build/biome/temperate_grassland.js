@@ -6,7 +6,7 @@ map.build.biome.temperate_grassland = function() {
   this.max_latitude = 60;
 
   this.frequency    = 5;
-  this.remanence    = 11;
+  this.remanence    = 16;
   
 };
 
