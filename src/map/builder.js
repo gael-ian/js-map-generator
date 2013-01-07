@@ -229,6 +229,8 @@ map.builder.prototype.defaultSteps = function() {
 
       var self = this;
 
+      this.shape.init();
+
       // Assign water
       this.corners.each(function(c) {
         c.water = !this.shape.isLand(c);

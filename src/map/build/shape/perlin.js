@@ -9,12 +9,15 @@ map.build.shape.perlin = function(builder, options) {
     base_y: 32
   });
 
-  this._bitmap  = new BitmapData(this.options.width, this.options.height);
-  this._x_coeff = this.options.width / this.builder.width;
-  this._y_coeff = this.options.height / this.builder.height;
-  this._diag    = Math.sqrt((this.builder.height * this.builder.height) + (this.builder.width * this.builder.width));
-  
-  this._bitmap.perlinNoise(this.options.base_x, this.options.base_y, this.options.seed, BitmapDataChannel.BLUE, false);
+  this.init = function() {
+
+    this._bitmap  = new BitmapData(this.options.width, this.options.height);
+    this._x_coeff = this.options.width / this.builder.width;
+    this._y_coeff = this.options.height / this.builder.height;
+    this._diag    = Math.sqrt((this.builder.height * this.builder.height) + (this.builder.width * this.builder.width));
+
+    this._bitmap.perlinNoise(this.options.base_x, this.options.base_y, this.options.seed, BitmapDataChannel.BLUE, false);
+  };
 
   this.isLand  = function(location) {
     var blue   = (this._bitmap.getPixel(Math.round(location.point.x * this._x_coeff), Math.round(location.point.y * this._y_coeff)) / 255)

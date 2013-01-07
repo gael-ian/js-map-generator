@@ -5,13 +5,15 @@ map.build.shape.radial = function(builder, options) {
     seed: Math.floor(Math.random() * ((new Date()).getTime() % this.builder.width))
   });
 
-  this._prng = new PRNG();
-  this._prng.seed = this.options.seed;
+  this.init = function() {
+    this._prng = new PRNG();
+    this._prng.seed = this.options.seed;
 
-  this._max_radius = ([this.builder.height, this.builder.width][Math.round(this._prng.nextRange(0, 1))] / 2);
-  this._bumps      = this._prng.nextRange(1, 6);
-  this._start_a    = this._prng.nextRange(0, 2 * Math.PI);
-  this._start_b    = this._prng.nextRange(0, 2 * Math.PI);
+    this._max_radius = ([this.builder.height, this.builder.width][Math.round(this._prng.nextRange(0, 1))] / 2);
+    this._bumps      = this._prng.nextRange(1, 6);
+    this._start_a    = this._prng.nextRange(0, 2 * Math.PI);
+    this._start_b    = this._prng.nextRange(0, 2 * Math.PI);
+  };
 
   this.isLand  = function(location) {
     var a      = location.point.radiantFrom(this.builder.center)

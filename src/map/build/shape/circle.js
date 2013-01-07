@@ -5,7 +5,10 @@ map.build.shape.circle = function(builder, options) {
     radius: 0.8
   });
 
+  this.init = function() {
+  };
+
   this.isLand  = function(location) {
-    return ((location.point.distanceFrom(this.builder.center) / (this.builder.shorter_dimension / 2)) < this.options.radius);
+    return ((location.point.distanceFromCenter() / (this.builder.shorter_dimension / 2)) < this.options.radius);
   };
 };
