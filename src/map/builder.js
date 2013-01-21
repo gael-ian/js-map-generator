@@ -224,38 +224,20 @@ map.builder.prototype.defaultSteps = function() {
   });
 
   steps.push({
-    name:     'Assign water',
+    name:     'Apply shape',
     callback: function() {
+      this.shape.apply();
+    }
+  });
 
-      var self = this;
-
-      this.shape.init();
-
-      // Assign water
-      this.corners.each(function(c) {
-        c.water = !this.shape.isLand(c);
-      }, this);
-      
-      this.centers.each(function(c) {
-        c.water = !c.corners.detect(function(co) { return !co.water });
-      }, this);
-
-      // Separate ocean and lake
-      this.centers.asQueue(function(c, queue, queued) {
-        c.ocean = true;
-        c.neighbors.each(function(n) {
-          if (0 > queued.indexOf(n) && 0 > queue.indexOf(n) && n.water) queue.push(n);
-        });
-      }, this, this.centers.select(function(c) { return (c.border() && c.water); }).toArray());
-
-      // Assign coast
-      this.centers.asQueue(function(c, queue, queued) {
+  steps.push({
+    name:     'Assign coast',
+    callback: function() {
+      this.centers.select(function(c) { return c.water; }).each(function(c) {
         c.neighbors.each(function(n) {
           if (!n.water) n.coast = true;
-          if (0 > queued.indexOf(n) && 0 > queue.indexOf(n) && n.water) queue.push(n);
         });
-      }, this, this.centers.select(function(c) { return c.ocean; }).toArray());
-
+      }, this);
     }
   });
 
@@ -268,10 +250,7 @@ map.builder.prototype.defaultSteps = function() {
       // Assign biomes
       this.centers.asQueue(function(c, queue, queued) {
 
-        var biomes = this.biomes.select(function(b) { return b.include(c); }).keys().reduce(function(memo, name) {
-            for(var i = 0, f = self.biomes[name].frequency; i < f; i++) { memo.push(name); }
-            return memo;
-          }, []);
+        var biomes = this.biomes.select(function(b) { return b.include(c); }).keys();
         c.neighbors.each(function(n) {
           if (undefined != n.biome && self.biomes[n.biome].tolerate(c)) {
             for(var i = 0, r = self.biomes[n.biome].remanence; i < r; i++) { biomes.push(n.biome); }

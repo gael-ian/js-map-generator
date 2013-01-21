@@ -16,8 +16,8 @@
     
       <ul id="layers">
         <li><a id="draw-graph" href="#">Graph</a></li>
+        <li><a id="draw-elevation" href="#">Elevation</a></li>
         <li><a id="draw-biomes" href="#">Biomes</a></li>
-        <li><a id="draw-full"  href="#">Full</a></li>
       </ul>
       
       <canvas id="map" width="950" height="750"></canvas>
@@ -39,6 +39,7 @@
     
     <script type="text/javascript" src="./src/map/core/dictionnary.js"></script>
     <script type="text/javascript" src="./src/map/core/stack.js"></script>
+    <script type="text/javascript" src="./src/map/core/easing.js"></script>
     
     <script type="text/javascript" src="./src/map/graph/point.js"></script>
     <script type="text/javascript" src="./src/map/graph/location.js"></script>
@@ -82,23 +83,27 @@
         , drawer        = new map.drawer(canvas)
 
         , steps = {
-            full:   drawer.defaultSteps()
-          , biomes: drawer.defaultSteps()
-          , graph:  drawer.defaultSteps()
+            graph:      drawer.defaultSteps()
+          , elevation:  drawer.defaultSteps()
+          , biomes:     drawer.defaultSteps()
         }
         ;
 
       // Setup builder
-      builder.setShape(map.build.shape.perlin);
+      builder.setShape(map.build.shape.pangea);
       
       builder.build();
-      
-      steps['biomes'].removeAfter('Draw biomes');
       
       steps['graph'].removeBefore('Draw edges');
       steps['graph'].removeAfter('Draw corners');
 
-      ['biomes', 'graph', 'full'].forEach(function(layer) {
+      steps['elevation'].removeBefore('Draw elevation');
+      steps['elevation'].removeAfter('Draw elevation');
+
+      steps['biomes'].removeBefore('Draw elevation');
+      steps['biomes'].removeAfter('Draw biomes');
+
+      Object.keys(steps).forEach(function(layer) {
         document.getElementById('draw-' + layer).addEventListener('click', function(e) {
           e.preventDefault();
           drawer.clear();
@@ -107,7 +112,7 @@
         }, false);
       });
       
-      drawer.steps = steps['biomes'];
+      drawer.steps = steps['elevation'];
       drawer.draw(builder);
       
     </script>

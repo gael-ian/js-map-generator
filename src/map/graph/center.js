@@ -18,3 +18,30 @@ map.graph.center.prototype.border = function() {
   }
   return this._border;
 };
+
+map.graph.center.prototype.pathTo = function(location) {
+  var path      = new map.core.dictionary()
+    , distance  = this.point.distanceFrom(location.point)
+    , point     = this
+    , next      = null
+    ;
+  
+  path[this.toString()] = this;
+
+  do {
+    next = point.neighbors.reduce(function(m, n) {
+      var d = n.point.distanceFrom(location.point);
+      if (d < distance) {
+        distance = d;
+        return n;
+      }
+      return m;
+    });
+    if (null != next) {
+      path[next.toString()] = next;
+      point = next;
+      distance = next.point.distanceFrom(location.point);
+    }
+  } while(null !== next);
+  return path;
+};

@@ -52,9 +52,10 @@ map.core.dictionary.prototype.detect = function(matcher, scope) {
   return null;
 };
 
-map.core.dictionary.prototype.reduce = function(source, callback, scope) {
-  var keys  = Object.keys(this)
-    , scope = (scope || this)
+map.core.dictionary.prototype.reduce = function(callback, scope, source) {
+  var keys   = Object.keys(this)
+    , scope  = (scope || this)
+    , source = (source || null)
     ;
 
   for(var i in keys) {
@@ -63,8 +64,23 @@ map.core.dictionary.prototype.reduce = function(source, callback, scope) {
   return source;
 };
 
+map.core.dictionary.prototype.sample = function() {
+  var keys   = Object.keys(this);
+  return this[keys[Math.floor(Math.random() * keys.length)]];
+};
+
+map.core.dictionary.prototype.samples = function(n) {
+  var keys    = Object.keys(this)
+    , samples = []
+    ;
+  for (var i = 0; i < n; i++) {
+    samples.push(this.sample());
+  }
+  return samples;
+};
+
 map.core.dictionary.prototype.toArray = function() {
-  return this.reduce([], function(m, i) { m.push(i); return m; });
+  return this.reduce(function(m, i) { m.push(i); return m; }, this, []);
 };
 
 map.core.dictionary.prototype.asQueue = function(callback, scope, queue) {
