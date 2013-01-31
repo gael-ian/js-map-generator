@@ -9,5 +9,4 @@ map.build.biome.montane_grassland = function() {
   this.remanence    = 2;
   
 };
-
-map.build.biome.montane_grassland.prototype = new map.build.biome.archtype.montane();
+map.utils.inherits(map.build.biome.montane_grassland, map.build.biome.archtype.montane);

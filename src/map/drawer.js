@@ -221,24 +221,41 @@ map.drawer.prototype.defaultSteps = function() {
   });
 
   steps.push({
-    name:     'Draw grid',
-    callback: function() {
-      var context = arguments[0];
+    name:     'Draw equator & tropics',
+    callback: function(context) {
+      var tropic_latitude = 23.26
+        , tropics         = []
+        ;
+
+      // Draw origin meridian
+      context.beginPath();
+      context.moveTo(this.center.x, 0);
+      context.lineTo(this.center.x, this.height);
+      context.strokeStyle = '#ccc';
+      context.stroke();
+
+      // Draw equator
+      context.beginPath();
+      context.moveTo(0, this.center.y);
+      context.lineTo(this.width, this.center.y);
+      context.strokeStyle = '#000';
+      context.stroke();
       
-      for (var i = 50; i <= (this.width - 50); i = i + 50) {
+      // Draw tropics
+      if (this.max_latitude > tropic_latitude) {
+        tropics.push(this.center.y - ((this.center.y * tropic_latitude) / this.max_latitude ));
+      }
+      if (this.min_latitude < -tropic_latitude) {
+        tropics.push(this.center.y + ((this.center.y * -tropic_latitude) / this.min_latitude ));
+      }
+
+      tropics.forEach(function(y) {
         context.beginPath();
-        context.moveTo(i, 0);
-        context.lineTo(i, this.height);
+        context.moveTo(0, y);
+        context.lineTo(this.width, y);
         context.strokeStyle = '#ccc';
         context.stroke();
-      }
-      for (var i = 50; i <= (this.height - 50); i = i + 50) {
-        context.beginPath();
-        context.moveTo(0, i);
-        context.lineTo(this.width, i);
-        context.strokeStyle = '#ccc';
-        context.stroke();
-      }
+      }, this);
     }
   });
 

@@ -9,5 +9,4 @@ map.build.biome.tropical_rainforest = function() {
   this.remanence    = 21;
   
 };
-
-map.build.biome.tropical_rainforest.prototype = new map.build.biome.archtype.base();
+map.utils.inherits(map.build.biome.tropical_rainforest, map.build.biome.archtype.base);

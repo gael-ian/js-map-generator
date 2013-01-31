@@ -10,7 +10,7 @@ map.graph.center = function(point) {
   this.corners    = new map.core.dictionary();
   
 };
-map.graph.center.prototype = new map.graph.location();
+map.utils.inherits(map.graph.center, map.graph.location);
   
 map.graph.center.prototype.border = function() {
   if (undefined === this._border) {
@@ -19,29 +19,31 @@ map.graph.center.prototype.border = function() {
   return this._border;
 };
 
-map.graph.center.prototype.pathTo = function(location) {
-  var path      = new map.core.dictionary()
-    , distance  = this.point.distanceFrom(location.point)
-    , point     = this
-    , next      = null
+map.graph.center.prototype.pathTo = function(locations) {
+  var path   = [this]
+    , origin = this
     ;
-  
-  path[this.toString()] = this;
-
-  do {
-    next = point.neighbors.reduce(function(m, n) {
-      var d = n.point.distanceFrom(location.point);
-      if (d < distance) {
-        distance = d;
-        return n;
-      }
-      return m;
-    });
-    if (null != next) {
-      path[next.toString()] = next;
-      point = next;
-      distance = next.point.distanceFrom(location.point);
+  locations.sort(function(a, b) {
+    var c = a.point.distanceFrom(origin.point)
+      , d = b.point.distanceFrom(origin.point)
+      ;
+    return ((c > d) ? 1 : ((c < d) ? -1 : 0));
+  }).forEach(function(l) {
+    var distance = origin.point.distanceFrom(l.point)
+      , current  = origin
+      ;
+    while(null !== (next = current.neighbors.reduce(function(m, n) {
+        var d = n.point.distanceFrom(l.point);
+        if (d < distance) {
+          distance = d;
+          return n;
+        }
+        return m;
+      }))) {
+      path.push(next);
+      current = next;
     }
-  } while(null !== next);
+    origin = l;
+  });
   return path;
 };

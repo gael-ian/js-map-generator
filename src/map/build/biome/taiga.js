@@ -9,5 +9,4 @@ map.build.biome.taiga = function() {
   this.remanence    = 39;
   
 };
-
-map.build.biome.taiga.prototype = new map.build.biome.archtype.base();
+map.utils.inherits(map.build.biome.taiga, map.build.biome.archtype.base);

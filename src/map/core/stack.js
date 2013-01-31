@@ -4,8 +4,8 @@
  */
 map.core.stack = function() {
   Array.apply(this, arguments);
-}
-map.core.stack.prototype = new Array();
+};
+map.utils.inherits(map.core.stack, Array);
 
 
 map.core.stack.prototype.removeBefore = function(name) {

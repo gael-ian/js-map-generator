@@ -9,5 +9,4 @@ map.build.biome.tropical_coniferous_forest = function() {
   this.remanence    = 0;
   
 };
-
-map.build.biome.tropical_coniferous_forest.prototype = new map.build.biome.archtype.base();
+map.utils.inherits(map.build.biome.tropical_coniferous_forest, map.build.biome.archtype.base);

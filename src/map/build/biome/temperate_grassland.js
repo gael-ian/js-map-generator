@@ -9,5 +9,4 @@ map.build.biome.temperate_grassland = function() {
   this.remanence    = 16;
   
 };
-
-map.build.biome.temperate_grassland.prototype = new map.build.biome.archtype.base();
+map.utils.inherits(map.build.biome.temperate_grassland, map.build.biome.archtype.base);

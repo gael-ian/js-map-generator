@@ -3,7 +3,9 @@ map = {
   core:  {},
   graph: {},
   build: {
-    shape : {},
+    shape : {
+      base: {}
+    },
     biome : {
       archtype: {}
     }

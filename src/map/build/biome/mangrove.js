@@ -8,5 +8,4 @@ map.build.biome.mangrove = function() {
   this.frequency    = 70;
   this.remanence    = 0;
 };
-
-map.build.biome.mangrove.prototype = new map.build.biome.archtype.coastal();
+map.utils.inherits(map.build.biome.mangrove, map.build.biome.archtype.coastal);

@@ -8,4 +8,4 @@ map.graph.edge = function(point) {
   this.centers    = new map.core.dictionary();
   this.corners    = new map.core.dictionary();
 };
-map.graph.edge.prototype = new map.graph.location();
+map.utils.inherits(map.graph.edge, map.graph.location);

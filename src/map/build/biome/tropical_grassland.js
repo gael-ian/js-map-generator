@@ -9,5 +9,4 @@ map.build.biome.tropical_grassland = function() {
   this.remanence    = 21;
   
 };
-
-map.build.biome.tropical_grassland.prototype = new map.build.biome.archtype.base();
+map.utils.inherits(map.build.biome.tropical_grassland, map.build.biome.archtype.base);

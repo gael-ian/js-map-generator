@@ -9,5 +9,4 @@ map.build.biome.tundra = function() {
   this.remanence    = 5;
   
 };
-
-map.build.biome.tundra.prototype = new map.build.biome.archtype.base();
+map.utils.inherits(map.build.biome.tundra, map.build.biome.archtype.base);

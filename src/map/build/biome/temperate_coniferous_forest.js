@@ -9,5 +9,4 @@ map.build.biome.temperate_coniferous_forest = function() {
   this.remanence    = 1;
   
 };
-
-map.build.biome.temperate_coniferous_forest.prototype = new map.build.biome.archtype.montane();
+map.utils.inherits(map.build.biome.temperate_coniferous_forest, map.build.biome.archtype.montane);

@@ -9,5 +9,4 @@ map.build.biome.temperate_broadleaf_forest = function() {
   this.remanence    = 16;
   
 };
-
-map.build.biome.temperate_broadleaf_forest.prototype = new map.build.biome.archtype.base();
+map.utils.inherits(map.build.biome.temperate_broadleaf_forest, map.build.biome.archtype.base);

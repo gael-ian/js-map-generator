@@ -5,7 +5,7 @@
 map.core.dictionary = function() {
   Object.apply(this, arguments);
 };
-map.core.dictionary.prototype = new Object();
+map.utils.inherits(map.core.dictionary, Object);
 
 map.core.dictionary.prototype.length = function() {
   return Object.keys(this).length;
@@ -72,9 +72,16 @@ map.core.dictionary.prototype.sample = function() {
 map.core.dictionary.prototype.samples = function(n) {
   var keys    = Object.keys(this)
     , samples = []
+    , sample
     ;
-  for (var i = 0; i < n; i++) {
-    samples.push(this.sample());
+  
+  if (this.length() <= n) return this.toArray();
+
+  while (samples.length < n) {
+    sample = this.sample();
+    if (-1 == samples.indexOf(sample)) {
+      samples.push(sample);
+    }
   }
   return samples;
 };

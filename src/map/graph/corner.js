@@ -9,7 +9,7 @@ map.graph.corner = function(point) {
   this.centers    = new map.core.dictionary();
   this.edges      = new map.core.dictionary();
 };
-map.graph.corner.prototype = new map.graph.location();
+map.utils.inherits(map.graph.corner, map.graph.location);
   
 map.graph.corner.prototype.border = function() {
   return this.point.border();

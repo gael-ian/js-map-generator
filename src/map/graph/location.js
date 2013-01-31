@@ -5,7 +5,7 @@ map.graph.location = function(point) {
   
   this.point     = point;
   
-  this.elevation = 0;
+  this.elevation = null;
   this.water     = false;
   
   this.mountain  = false;

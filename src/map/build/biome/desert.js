@@ -9,5 +9,4 @@ map.build.biome.desert = function() {
   this.remanence    = 19;
   
 };
-
-map.build.biome.desert.prototype = new map.build.biome.archtype.base();
+map.utils.inherits(map.build.biome.desert, map.build.biome.archtype.base);

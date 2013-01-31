@@ -18,6 +18,7 @@
         <li><a id="draw-graph" href="#">Graph</a></li>
         <li><a id="draw-elevation" href="#">Elevation</a></li>
         <li><a id="draw-biomes" href="#">Biomes</a></li>
+        <li><a id="draw-latlong" href="#">Equator &amp; tropics</a></li>
       </ul>
       
       <canvas id="map" width="950" height="750"></canvas>
@@ -46,7 +47,8 @@
     <script type="text/javascript" src="./src/map/graph/corner.js"></script>
     <script type="text/javascript" src="./src/map/graph/center.js"></script>
     <script type="text/javascript" src="./src/map/graph/edge.js"></script>
-    
+
+    <script type="text/javascript" src="./src/map/build/shape/base/chains.js"></script>
     <script type="text/javascript" src="./src/map/build/shape/square.js"></script>
     <script type="text/javascript" src="./src/map/build/shape/circle.js"></script>
     <script type="text/javascript" src="./src/map/build/shape/radial.js"></script>
@@ -86,6 +88,7 @@
             graph:      drawer.defaultSteps()
           , elevation:  drawer.defaultSteps()
           , biomes:     drawer.defaultSteps()
+          , latlong:    drawer.defaultSteps()
         }
         ;
 
@@ -103,10 +106,13 @@
       steps['biomes'].removeBefore('Draw elevation');
       steps['biomes'].removeAfter('Draw biomes');
 
+      steps['latlong'].removeBefore('Draw equator & tropics');
+      steps['latlong'].removeAfter('Draw equator & tropics');
+
       Object.keys(steps).forEach(function(layer) {
         document.getElementById('draw-' + layer).addEventListener('click', function(e) {
           e.preventDefault();
-          drawer.clear();
+          if (layer != 'latlong') drawer.clear();
           drawer.steps = steps[layer];
           drawer.draw(builder);
         }, false);

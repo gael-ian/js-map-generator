@@ -29,8 +29,8 @@ map.builder = function(canvas) {
   this.max_latitude  =  90;
   this.min_latitude  = -90;
 
-  this.max_longitude =  90;
-  this.min_longitude = -90;
+  this.max_longitude =  180;
+  this.min_longitude = -180;
   
   this.steps = new map.core.stack();
 
@@ -63,12 +63,14 @@ map.builder.prototype.setShape = function(shape_class, shape_options) {
 
 ['min_latitude', 'max_latitude', 'min_longitude', 'max_longitude'].forEach(function(name) {
   var camelized_name = name.replace (/(?:^|[-_])(\w)/g, function (_, c) {
-    return c ? c.toUpperCase () : '';
-  });
+        return c ? c.toUpperCase () : '';
+      })
+    , max = (name.match(/longitude/) ? 180 : 90)
+    ; 
   
   map.builder.prototype['set' + camelized_name] = function(limit) {
     limit = parseInt(limit, 10);
-    if (limit > 90 || limit < -90) {
+    if (limit > max || limit < -max) {
       throw new RangeError('Invalid limit');
     }
     this[name] = limit;

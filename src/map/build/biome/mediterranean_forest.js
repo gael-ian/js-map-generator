@@ -9,5 +9,4 @@ map.build.biome.mediterranean_forest = function() {
   this.remanence    = 10;
   
 };
-
-map.build.biome.mediterranean_forest.prototype = new map.build.biome.archtype.coastal();
+map.utils.inherits(map.build.biome.mediterranean_forest, map.build.biome.archtype.coastal);
