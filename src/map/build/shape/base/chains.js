@@ -12,11 +12,13 @@ map.build.shape.base.chains = function(builder, options) {
 
 map.build.shape.base.chains.prototype.defaultOptions = function() {
   return {
-    seed:  Math.floor(Math.random() * ((new Date()).getTime() % this.builder.width)),
-    ceil:  9000,
-    noise: function(x, elevation) {
-      return (elevation); // + 0.2 * Math.sin(bump * x) * elevation);
-    }
+      seed:  Math.floor(Math.random() * ((new Date()).getTime() % this.builder.width))
+    , ceil:  9000
+    , noise: function(x, elevation) {
+        return (elevation); // + 0.2 * Math.sin(bump * x) * elevation);
+      }
+    , easing: 'cubicBezier'
+    , easing_options: { a: { x: 0.3, y: 0.4 }, b: { x: 0.7, y: 0.6 } }
   };
 };
 
@@ -44,10 +46,6 @@ map.build.shape.base.chains.prototype.chains = function(n, matcher) {
 };
 
 map.build.shape.base.chains.prototype.interpolate = function(easing, easing_options) {
-  var easing         = (easing || 'cubicBezier')
-    , easing_options = (easing_options || { a: { x: 0.3, y: 0.4 }, b: { x: 0.7, y: 0.6 } })
-    ;
-  
   this.builder.centers.asQueue(function(c, queue, queued) {
     var find_nearest      = function(nearest, center) {
           if (null == nearest) return center;
@@ -58,10 +56,10 @@ map.build.shape.base.chains.prototype.interpolate = function(easing, easing_opti
       , nearest_trench    = this.trenches.reduce(find_nearest, null)
       , trench_distance   = nearest_trench.point.distanceFrom(c.point)
       , mountain_distance = nearest_mountain.point.distanceFrom(c.point)
-      , scale             = map.core.easing[easing](
+      , scale             = map.core.easing[this.options.easing](
           { x: 0, y: nearest_trench.elevation },
           { x: trench_distance + mountain_distance,   y: nearest_mountain.elevation   },
-          easing_options
+          this.options.easing_options
         )
       ;
 
@@ -95,8 +93,8 @@ map.build.shape.base.chains.prototype.matrix = function(width, height) {
 
 map.build.shape.base.chains.prototype.apply = function() {
   var shape  = this
-    , width  = Math.round(this.prng.nextRange(4, 8))
-    , height = Math.round(this.prng.nextRange(4, 8))
+    , width  = Math.round(this.prng.nextRange(8, 12))
+    , height = Math.round(this.prng.nextRange(8, 12))
     , matrix = this.matrix(width, height)
     ;
 
@@ -106,8 +104,8 @@ map.build.shape.base.chains.prototype.apply = function() {
       var pool       = matrix[i][j]
         , collection = this[pool]
         , elevation  = (pool == 'trenches' ? -this.options.ceil : this.options.ceil)
-        , elevation  = [elevation, elevation/2, elevation, elevation/5][Math.round(this.prng.nextRange(0, 3))]
-        , pits       = Math.round(this.prng.nextRange(2, 3))
+        , elevation  = [elevation, elevation/3, elevation, elevation/5][Math.round(this.prng.nextRange(0, 3))]
+        , pits       = Math.round(this.prng.nextRange(1, 3))
         , chains     = this.chains(pits, function(c) {
             return (c.point.x >= x && c.point.x <= x + dx && c.point.y >= y && c.point.y <= y + dy);
           }, this.builder)

@@ -3,7 +3,7 @@ map.build.shape.pangea = function(builder, options) {
 };
 map.utils.inherits(map.build.shape.pangea, map.build.shape.base.chains);
 
-map.build.shape.base.chains.prototype.matrix = function(width, height) {
+map.build.shape.pangea.prototype.matrix = function(width, height) {
   var matrix = map.utils.matrix(width, height)
     , pool   = []
     ;
