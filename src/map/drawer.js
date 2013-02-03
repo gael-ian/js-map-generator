@@ -142,14 +142,16 @@ map.drawer.prototype.defaultSteps = function() {
             return m;
           }, this, { min: 0, max: 0 })
         , scale     = map.core.easing.linear({ x: elevation.min, y: 0 }, { x: elevation.max, y: 100 })
-        , sea_level = scale(0)
         , gradient  = context.createLinearGradient(0, 0, 0, 100)
         ;
 
-      gradient.addColorStop(0,   '#4E4B89');
-      gradient.addColorStop((sea_level / 100),   '#4D86CC');
-      gradient.addColorStop((sea_level / 100),   '#E6C36B');
-      gradient.addColorStop(1,   '#9B1917');
+      gradient.addColorStop(0,   '#106783');
+      gradient.addColorStop((scale(0) / 100),   '#b8dbdb');
+      gradient.addColorStop((scale(1) / 100),   '#316626');
+      gradient.addColorStop((scale(elevation.max * 0.30) / 100), '#fcf5a5');
+      gradient.addColorStop((scale(elevation.max * 0.55) / 100), '#ce8c3b');
+      gradient.addColorStop((scale(elevation.max * 0.80) / 100), '#53402a');
+      gradient.addColorStop(1,   '#FFFFFF');
 
       context.fillStyle = gradient;
       context.fillRect(0, 0, 1, 100);
