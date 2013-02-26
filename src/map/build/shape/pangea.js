@@ -17,26 +17,16 @@ map.build.shape.pangea.prototype.matrix = function(width, height) {
           break;
 
         case (j == 0 || j == (height - 1)):
-          pool = ['trenches', 'trenches', 'mountains'];
+          pool = ['trenches', 'mountains'];
           break;
 
         default:
-          pool = ['trenches', 'mountains', 'mountains'];
+          pool = ['trenches', 'mountains', 'mountains', 'mountains', 'mountains'];
           break;
       }
       matrix[i][j] = pool[Math.round(this.prng.nextRange(0, pool.length - 1))];
       
     }
-  }
-  
-  if (this.builder.min_longitude == -180 && this.builder.max_longitude == 180) {
-    var east = matrix[0]
-      , west = matrix[width - 1]
-      ;
-    east.forEach(function(east_terrain, i) {
-      if (west[i] !== east_terrain) west[i] = east_terrain;
-    });
-  }
-  
+  }  
   return matrix;
 };

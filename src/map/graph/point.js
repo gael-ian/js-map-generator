@@ -20,11 +20,26 @@ map.graph.point.prototype.setContext = function(context) {
   this.context = context;
 };
 
-map.graph.point.prototype.border = function() {
+map.graph.point.prototype.border = function(side) {
   if (null == this.context) {
     throw new TypeError('context not set for ' + this);
   }
-  return (this.x == 0 || this.y == 0 || this.x == this.context.width || this.y == this.context.height);
+  switch(side) {
+    case 'west':
+      return (this.x == 0);
+      
+    case 'east':
+      return (this.x == this.context.width);
+      
+    case 'north':
+      return (this.y == 0);
+      
+    case 'south':
+      return (this.y == this.context.height);
+      
+    default:
+      return (this.x == 0 || this.y == 0 || this.x == this.context.width || this.y == this.context.height);
+  }
 }
 
 map.graph.point.prototype.distanceFrom = function(point) {
