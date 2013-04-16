@@ -45,6 +45,35 @@ map.build.shape.base.chains.prototype.chains = function(n, matcher) {
   return chains;
 };
 
+map.build.shape.base.chains.prototype.smooth = function() {
+  this.builder.centers.each(function(c) {
+    c.elevation = c.neighbors.reduce(function(s, n) { return s + n.elevation; }, this, 0) / c.neighbors.length();
+    if (c.elevation <= 0) c.water = true;
+  });
+};
+
+map.build.shape.base.chains.prototype.matchLimits = function(limit_a, limit_b) {
+  var model = (limit_a.length() > limit_b.length() ? limit_a : limit_b)
+    
+  model.each(function(c) {
+    var o = c.opposite()
+      , d = c.point.y + (this.builder.width - o.point.y)
+      ;
+    if (o.elevation > c.elevation) {
+      c.elevation = this.options.noise(d, o.elevation);
+    } else {
+      o.elevation = this.options.noise(d, c.elevation);
+    }
+    
+    if (c.elevation > 0) this.mountains.push(c);
+    if (c.elevation <= 0) this.trenches.push(c);
+    
+    if (o.elevation > 0) this.mountains.push(o);
+    if (o.elevation <= 0) this.trenches.push(o);
+    
+  }, this);
+};
+
 map.build.shape.base.chains.prototype.interpolate = function() {
   var queue_start = []
     , elevation   = function(c) {
@@ -71,31 +100,32 @@ map.build.shape.base.chains.prototype.interpolate = function() {
   if (this.builder.max_longitude == 180 && this.builder.min_longitude == -180) {
     var west_border = this.builder.centers.select(function(c) { return c.border('west'); })
       , east_border = this.builder.centers.select(function(c) { return c.border('east'); })
-      , main_border = (west_border.length() > east_border.length() ? west_border : east_border)
       ;
     
     west_border.each(function(c) { c.elevation = elevation.call(this, c); }, this);
     east_border.each(function(c) { c.elevation = elevation.call(this, c); }, this);
     
+    this.matchLimits(west_border, east_border);
+  }
+  
+  if (this.builder.max_latitude == 90) {
+    var north_border = this.builder.centers.select(function(c) { return c.border('north'); })
+      , nw_border    = north_border.select(function(c) { return c.point.x < this.builder.center.x; }, this)
+      , ne_border    = north_border.select(function(c) { return c.point.x >= this.builder.center.x; }, this)
+      ;
     
-    
-    main_border.each(function(c) {
-      var o = c.opposite()
-        , d = c.point.y + (this.builder.width - o.point.y)
-        ;
-      if (o.elevation > c.elevation) {
-        c.elevation = this.options.noise(d, o.elevation);
-      } else {
-        o.elevation = this.options.noise(d, c.elevation);
-      }
+    north_border.each(function(c) { c.elevation = elevation.call(this, c); }, this);
+    this.matchLimits(nw_border, ne_border);
+  }
+  
+  if (this.builder.min_latitude == -90) {
+    var south_border = this.builder.centers.select(function(c) { return c.border('south'); })
+      , sw_border    = south_border.select(function(c) { return c.point.x < this.builder.center.x; }, this)
+      , se_border    = south_border.select(function(c) { return c.point.x >= this.builder.center.x; }, this)
+      ;
       
-      if (c.elevation > 0) this.mountains.push(c);
-      if (c.elevation <= 0) this.trenches.push(c);
-      
-      if (o.elevation > 0) this.mountains.push(o);
-      if (o.elevation <= 0) this.trenches.push(o);
-      
-    }, this);
+    south_border.each(function(c) { c.elevation = elevation.call(this, c); }, this);
+    this.matchLimits(sw_border, se_border);
   }
   
   this.builder.centers.asQueue(function(c, queue, queued) {
@@ -109,13 +139,6 @@ map.build.shape.base.chains.prototype.interpolate = function() {
       if (0 > queued.indexOf(n) && 0 > queue.indexOf(n)) queue.push(n);
     });
   }, this, queue_start);
-};
-
-map.build.shape.base.chains.prototype.smooth = function() {
-  this.builder.centers.each(function(c) {
-    c.elevation = c.neighbors.reduce(function(s, n) { return s + n.elevation; }, this, 0) / c.neighbors.length();
-    if (c.elevation <= 0) c.water = true;
-  });
 };
 
 map.build.shape.base.chains.prototype.matrix = function(width, height) {
