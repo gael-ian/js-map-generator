@@ -15,7 +15,7 @@ map.build.shape.base.chains.prototype.defaultOptions = function() {
       seed:  Math.floor(Math.random() * ((new Date()).getTime() % this.builder.width))
     , ceil:  9000
     , noise: function(x, elevation) {
-        return (elevation); // + 0.2 * Math.sin(bump * x) * elevation);
+        return (elevation + 0.2 * Math.sin(x) * elevation);
       }
     , easing: 'cubicBezier'
     , easing_options: { a: { x: 0.3, y: 0.4 }, b: { x: 0.7, y: 0.6 } }
@@ -26,13 +26,15 @@ map.build.shape.base.chains.prototype.chains = function(n, matcher) {
   var chains = []
     , limits = undefined
     , size   = 0
-    , points = this.builder.centers.select(matcher).samples(n).sort(function(a, b) {
-        var c = a.point.latitude()
-          , d = b.point.latitude()
-          ;
-        return ((c > d) ? 1 : ((c < d) ? -1 : 0));
-      })
+    , points = this.builder.centers.select(matcher).samples(n)
     ;
+  
+  points = points.sort(function(a, b) {
+    var c = a.point.latitude()
+      , d = b.point.latitude()
+      ;
+    return ((c > d) ? 1 : ((c < d) ? -1 : 0));
+  });
 
   while(   0 != (size = Math.min(3, points.length))
         && undefined !== (limits = points.splice(0, size))) {
@@ -45,100 +47,123 @@ map.build.shape.base.chains.prototype.chains = function(n, matcher) {
   return chains;
 };
 
-map.build.shape.base.chains.prototype.smooth = function() {
-  this.builder.centers.each(function(c) {
-    c.elevation = c.neighbors.reduce(function(s, n) { return s + n.elevation; }, this, 0) / c.neighbors.length();
-    if (c.elevation <= 0) c.water = true;
-  });
+map.build.shape.base.chains.prototype.elevation = function(c) {
+  var find_nearest = function(nearest, center) {
+        if (null == nearest) return center;
+        if (center.point.distanceFrom(c.point) < nearest.point.distanceFrom(c.point)) return center;
+        return nearest;
+      }
+    , nearest_mountain  = this.mountains.reduce(find_nearest, null)
+    , nearest_trench    = this.trenches.reduce(find_nearest, null)
+    , trench_distance   = nearest_trench.point.distanceFrom(c.point)
+    , mountain_distance = nearest_mountain.point.distanceFrom(c.point)
+    , scale             = map.core.easing[this.options.easing](
+        { x: 0, y: nearest_trench.elevation },
+        { x: trench_distance + mountain_distance, y: nearest_mountain.elevation },
+        this.options.easing_options
+      )
+    ;
+
+  return this.options.noise(trench_distance, scale(trench_distance));
 };
 
-map.build.shape.base.chains.prototype.matchLimits = function(limit_a, limit_b) {
-  var model = (limit_a.length() > limit_b.length() ? limit_a : limit_b)
-    
-  model.each(function(c) {
-    var o = c.opposite()
-      , d = c.point.y + (this.builder.width - o.point.y)
-      ;
-    if (o.elevation > c.elevation) {
-      c.elevation = this.options.noise(d, o.elevation);
-    } else {
-      o.elevation = this.options.noise(d, c.elevation);
-    }
-    
-    if (c.elevation > 0) this.mountains.push(c);
-    if (c.elevation <= 0) this.trenches.push(c);
-    
-    if (o.elevation > 0) this.mountains.push(o);
-    if (o.elevation <= 0) this.trenches.push(o);
-    
+map.build.shape.base.chains.prototype.level = function(centers) {
+  var sum = centers.reduce(function(m, c) {
+        c.elevation = this.elevation(c);
+        return m + c.elevation;
+      }, this, 0)
+    , avg = sum / centers.length()
+    ;
+      
+  centers.each(function(c, i) {
+    c.elevation = this.options.noise(i, avg);
   }, this);
 };
 
 map.build.shape.base.chains.prototype.interpolate = function() {
-  var queue_start = []
-    , elevation   = function(c) {
-        var find_nearest = function(nearest, center) {
-              if (null == nearest) return center;
-              if (center.point.distanceFrom(c.point) < nearest.point.distanceFrom(c.point)) return center;
-              return nearest;
-            }
-          , nearest_mountain  = this.mountains.reduce(find_nearest, null)
-          , nearest_trench    = this.trenches.reduce(find_nearest, null)
-          , trench_distance   = nearest_trench.point.distanceFrom(c.point)
-          , mountain_distance = nearest_mountain.point.distanceFrom(c.point)
-          , scale             = map.core.easing[this.options.easing](
-              { x: 0, y: nearest_trench.elevation },
-              { x: trench_distance + mountain_distance,   y: nearest_mountain.elevation   },
-              this.options.easing_options
-            )
-          ;
-
-        return this.options.noise(trench_distance, scale(trench_distance));
-      }
+  var queue_start  = []
+    , smooth_start = []
+    , borders      = []
     ;
+    
+  if (this.builder.max_latitude == 90) borders.push('north');
+  if (this.builder.min_latitude == -90) borders.push('south');
   
+  borders.forEach(function(border) {
+    var b = this.builder.centers.select(function(c) { return c.border(border); })
+    this.level(b);
+    b.each(function(c) { 
+      queue_start.push(c);
+      smooth_start.push(c);
+    }, this);
+  }, this);
+
   if (this.builder.max_longitude == 180 && this.builder.min_longitude == -180) {
     var west_border = this.builder.centers.select(function(c) { return c.border('west'); })
       , east_border = this.builder.centers.select(function(c) { return c.border('east'); })
+      , main_border = (west_border.length() > east_border.length() ? west_border : east_border)
       ;
     
-    west_border.each(function(c) { c.elevation = elevation.call(this, c); }, this);
-    east_border.each(function(c) { c.elevation = elevation.call(this, c); }, this);
+    west_border.each(function(c) {
+      c.elevation = this.elevation(c);
+      queue_start.push(c);
+      smooth_start.push(c);
+    }, this);
     
-    this.matchLimits(west_border, east_border);
-  }
-  
-  if (this.builder.max_latitude == 90) {
-    var north_border = this.builder.centers.select(function(c) { return c.border('north'); })
-      , nw_border    = north_border.select(function(c) { return c.point.x < this.builder.center.x; }, this)
-      , ne_border    = north_border.select(function(c) { return c.point.x >= this.builder.center.x; }, this)
-      ;
+    east_border.each(function(c) {
+      c.elevation = this.elevation(c);
+      queue_start.push(c);
+      smooth_start.push(c);
+    }, this);
     
-    north_border.each(function(c) { c.elevation = elevation.call(this, c); }, this);
-    this.matchLimits(nw_border, ne_border);
-  }
-  
-  if (this.builder.min_latitude == -90) {
-    var south_border = this.builder.centers.select(function(c) { return c.border('south'); })
-      , sw_border    = south_border.select(function(c) { return c.point.x < this.builder.center.x; }, this)
-      , se_border    = south_border.select(function(c) { return c.point.x >= this.builder.center.x; }, this)
-      ;
-      
-    south_border.each(function(c) { c.elevation = elevation.call(this, c); }, this);
-    this.matchLimits(sw_border, se_border);
+    main_border.each(function(c) {
+      var o = c.opposite()
+        , d = c.point.y + (this.builder.width - o.point.y)
+        ;
+      if (Math.abs(c.elevation) > Math.abs(o.elevation)) {
+        c.elevation = this.options.noise(d, o.elevation);
+      } else {
+        o.elevation = this.options.noise(d, c.elevation);
+      }    
+    }, this);
+    
+    west_border.each(function(c) {
+      var adjacents = c.neighbors.select(function(n) { return n.border(); }, this);
+      c.elevation = adjacents.reduce(function(s, n) { return s + n.elevation; }, this, 0) / adjacents.length();
+      queue_start.push(c);
+      smooth_start.push(c);
+    }, this);
+    
+    east_border.each(function(c) {
+      var adjacents = c.neighbors.select(function(n) { return n.border(); }, this);
+      c.elevation = adjacents.reduce(function(s, n) { return s + n.elevation; }, this, 0) / adjacents.length();
+      queue_start.push(c);
+      smooth_start.push(c);
+    }, this);
   }
   
   this.builder.centers.asQueue(function(c, queue, queued) {
-    if (null == c.elevation) c.elevation = elevation.call(this, c);
+    if (null == c.elevation) c.elevation = this.elevation(c);
     
-    if (c.elevation > (0.9 * this.options.ceil)) this.mountains.push(c);
-    if (c.elevation < (-0.9 * this.options.ceil)) this.trenches.push(c);
+    if (c.elevation > (0.5 * this.options.ceil)) this.mountains.push(c);
+    if (c.elevation < (0.5 * -this.options.ceil)) this.trenches.push(c);
     if (c.elevation <= 0) c.water = true;
 
     c.neighbors.each(function(n) {
       if (0 > queued.indexOf(n) && 0 > queue.indexOf(n)) queue.push(n);
     });
   }, this, queue_start);
+  
+  this.builder.centers.asQueue(function(c, queue, queued) {
+    
+    if (!c.border()) {
+      c.elevation = c.neighbors.reduce(function(s, n) { return s + n.elevation; }, this, 0) / c.neighbors.length();
+    }
+    
+    c.neighbors.each(function(n) {
+      if (0 > queued.indexOf(n) && 0 > queue.indexOf(n)) queue.push(n);
+    });
+  }, this, smooth_start);
 };
 
 map.build.shape.base.chains.prototype.matrix = function(width, height) {
@@ -155,8 +180,8 @@ map.build.shape.base.chains.prototype.apply = function() {
   var shape           = this
     , latitude_range  = (this.builder.max_latitude - this.builder.min_latitude)
     , longitude_range = (this.builder.max_longitude - this.builder.min_longitude)
-    , width           = Math.round(this.prng.nextRange(longitude_range/24, longitude_range/18))
-    , height          = Math.round(this.prng.nextRange(latitude_range/24, latitude_range/18))
+    , width           = Math.round(this.prng.nextRange(longitude_range/12, longitude_range/18))
+    , height          = Math.round(this.prng.nextRange(latitude_range/12, latitude_range/18))
     , matrix          = this.matrix(width, height)
     ;
 
@@ -166,13 +191,14 @@ map.build.shape.base.chains.prototype.apply = function() {
       var pool       = matrix[i][j]
         , collection = this[pool]
         , elevation  = (pool == 'trenches' ? -this.options.ceil : this.options.ceil)
-        , elevation  = [elevation, elevation/3, elevation, elevation/5][Math.round(this.prng.nextRange(0, 3))]
+        , elevations = [elevation, elevation/3, elevation, elevation/5]
         , pits       = Math.round(this.prng.nextRange(1, 3))
         , chains     = this.chains(pits, function(c) {
             return (c.point.x >= x && c.point.x <= x + dx && c.point.y >= y && c.point.y <= y + dy);
           }, this.builder)
         ;
       chains.forEach(function(chain) {
+        elevation = elevations[Math.floor(this.prng.nextRange(0, elevations.length - 1))];
         chain.forEach(function(c) {
           c.elevation = this.options.noise(c.point.x, elevation);
           collection.push(c);
@@ -183,5 +209,4 @@ map.build.shape.base.chains.prototype.apply = function() {
   }
 
   this.interpolate();
-  this.smooth();
 };

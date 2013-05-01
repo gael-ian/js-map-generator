@@ -27,11 +27,13 @@ map.build.shape.island_sea.prototype.matrix = function(width, height) {
 
       switch(true) {
           
-        case (i >= Math.floor(0.8 * ri) && i <= Math.ceil(1.2 * ri)) && (j >= Math.floor(0.8 * rj) && j <= Math.ceil(1.2 * rj)) :
+        case (i >= Math.floor(0.8 * ri) && i <= Math.ceil(1.2 * ri))
+          && (j >= Math.floor(0.8 * rj) && j <= Math.ceil(1.2 * rj)) :
           pool = ['trenches'];
           break;
 
-        case (i > Math.floor(0.4 * ri) && i < Math.ceil(1.6 * ri)) && (j > Math.floor(0.4 * rj) && j < Math.ceil(1.6 * rj)) :
+        case (i > Math.floor(0.4 * ri) && i < Math.ceil(1.6 * ri))
+          && (j > Math.floor(0.4 * rj) && j < Math.ceil(1.6 * rj)) :
           pool = ['trenches', 'mountains'];
           break;
 

@@ -141,29 +141,29 @@ map.drawer.prototype.defaultSteps = function() {
             if (c.elevation < m.min) m.min = c.elevation;
             return m;
           }, this, { min: 0, max: 0 })
-        , scale     = map.core.easing.linear({ x: elevation.min, y: 0 }, { x: elevation.max, y: 100 })
+        , scale     = map.core.easing.linear({ x: elevation.min, y: 0 }, { x: elevation.max, y: 99 })
         , gradient  = context.createLinearGradient(0, 0, 0, 100)
         ;
 
       gradient.addColorStop(0,   '#106783');
-      gradient.addColorStop((scale(0) / 100),   '#b8dbdb');
+      gradient.addColorStop((scale(0) / 100),   '#82dbdb');
       gradient.addColorStop((scale(1) / 100),   '#316626');
-      gradient.addColorStop((scale(elevation.max * 0.30) / 100), '#fcf5a5');
-      gradient.addColorStop((scale(elevation.max * 0.55) / 100), '#ce8c3b');
-      gradient.addColorStop((scale(elevation.max * 0.80) / 100), '#53402a');
+      gradient.addColorStop((scale(elevation.max * 0.45) / 100), '#f1c457');
+      gradient.addColorStop((scale(elevation.max * 0.90) / 100), '#53402a');
       gradient.addColorStop(1,   '#FFFFFF');
 
       context.fillStyle = gradient;
-      context.fillRect(0, 0, 1, 100);
+      context.fillRect(0, 0, 100, 100);
       
-      var colors = context.getImageData(0, 0, 1, 100).data;
+      var colors      = context.getImageData(0, 0, 1, 100).data
+        , color_scale = []
+        ;
+      for (var pos = 0; pos < 100; pos++) {
+        color_scale.push('rgb(' + colors[pos*4] + ',' + colors[pos*4+1] + ',' + colors[pos*4+2] + ')');
+      }
 
       this.centers.each(function(c) {
-        var offset = scale(c.elevation) * 3.99
-          , pos    = Math.floor(offset - offset % 4)
-          , color  = 'rgb(' + colors[pos] + ',' + colors[pos+1] + ',' + colors[pos+2] + ')'
-          ;
-        drawer.fillRegion(c, color);
+        drawer.fillRegion(c, color_scale[Math.floor(scale(c.elevation))]);
       }, this);
     }
   });

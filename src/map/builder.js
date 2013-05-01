@@ -105,7 +105,7 @@ map.builder.prototype.defaultSteps = function() {
     name:     'Generate random points',
     callback: function() {
       this.points = [];
-      for (var i = 0, num_points = Math.round((this.width * this.height) / 200); i <= num_points; i++) {
+      for (var i = 0, num_points = Math.round((this.width * this.height) / 500); i <= num_points; i++) {
         var x = Math.round(Math.random() * this.width)
           , y = Math.round(Math.random() * this.height)
           ;
@@ -229,6 +229,15 @@ map.builder.prototype.defaultSteps = function() {
     name:     'Apply shape',
     callback: function() {
       this.shape.apply();
+    }
+  });
+
+  steps.push({
+    name:     'Assign corner elevation',
+    callback: function() {
+      this.corners.each(function(c) {
+        c.elevation = (c.centers.reduce(function(m, ce) { return m + ce.elevation; }, this, 0) / c.centers.length());
+      }, this);
     }
   });
 
