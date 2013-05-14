@@ -56,6 +56,11 @@
     <script type="text/javascript" src="./src/map/build/shape/pangea.js"></script>
     <script type="text/javascript" src="./src/map/build/shape/island-sea.js"></script>
 
+    <script type="text/javascript" src="./src/map/draw/base.js"></script>
+    <script type="text/javascript" src="./src/map/draw/bidimensional/base.js"></script>
+    <script type="text/javascript" src="./src/map/draw/bidimensional/proportional.js"></script>
+    <script type="text/javascript" src="./src/map/draw/bidimensional/mercator.js"></script>
+
     <script type="text/javascript" src="./src/map/build/biome/archtype/base.js"></script>
     <script type="text/javascript" src="./src/map/build/biome/archtype/coastal.js"></script>
     <script type="text/javascript" src="./src/map/build/biome/archtype/montane.js"></script>
@@ -82,8 +87,8 @@
     <script type="text/javascript">
     
       var canvas        = document.getElementById('map')
-        , builder       = new map.builder(canvas)
-        , drawer        = new map.drawer(canvas)
+        , builder       = new map.builder()
+        , drawer        = new map.draw.bidimensional.proportional(canvas)
 
         , steps = {
             graph:      drawer.defaultSteps()
@@ -98,9 +103,11 @@
       
       builder.build();
       
+
+      /*
       steps['graph'].removeBefore('Draw edges');
       steps['graph'].removeAfter('Draw corners');
-
+      
       steps['elevation'].removeBefore('Draw elevation');
       steps['elevation'].removeAfter('Draw elevation');
 
@@ -118,8 +125,9 @@
           drawer.draw(builder);
         }, false);
       });
+      */
       
-      drawer.steps = steps['elevation'];
+      drawer.steps = steps['graph'];
       drawer.draw(builder);
       
     </script>

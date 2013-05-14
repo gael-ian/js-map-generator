@@ -9,5 +9,9 @@ map = {
     biome : {
       archtype: {}
     }
+  },
+  draw:  {
+    bidimensional:  {},
+    tridimensional: {},
   }
 };

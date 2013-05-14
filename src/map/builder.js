@@ -2,9 +2,30 @@
  * map.builder
  * Process buildSteps to construct a new random map representation
  */
-map.builder = function(canvas) {
+map.builder = function() {
   
-  this.shape  = null;
+  this.radius        =  5000;
+  
+  this.max_latitude  =  90;
+  this.min_latitude  = -90;
+
+  this.max_longitude =  180;
+  this.min_longitude = -180;
+  
+  this.resolution    =  0.05;
+
+  
+  this.prng  = new PRNG();
+  this.seed  = Math.floor(Math.random() * ((new Date()).getTime() % this.radius));
+  
+  this.shape = null;
+  
+  
+  this.steps = new map.core.stack();
+
+  this.reset();
+  
+  /*
   this.biomes = new map.core.dictionary();
 
   [
@@ -25,40 +46,28 @@ map.builder = function(canvas) {
   ].forEach(function(name) {
     this.biomes[name] = new map.build.biome[name]();
   }, this);
-
-  this.max_latitude  =  90;
-  this.min_latitude  = -90;
-
-  this.max_longitude =  180;
-  this.min_longitude = -180;
-  
-  this.steps = new map.core.stack();
-
-  this.setCanvas(canvas);
+  */
 };
 
 map.builder.prototype.reset = function() {
-
-  this.center  = null;
-  this.points  = [];
-
-  this.centers = new map.core.dictionary();
-  this.edges   = new map.core.dictionary();
-  this.corners = new map.core.dictionary();
-};
-
-map.builder.prototype.setCanvas = function(canvas) {
-
-  this.canvas  = canvas;
-
-  this.width   = canvas.clientWidth;
-  this.height  = canvas.clientHeight;
-
-  this.reset();
+  this.points    = [];
+  
+  this.centers   = new map.core.dictionary();
+  this.edges     = new map.core.dictionary();
+  this.corners   = new map.core.dictionary();
+  
+  this.prng.seed = this.seed;
 };
 
 map.builder.prototype.setShape = function(shape_class, shape_options) {
   this.shape = new shape_class(this, shape_options);
+};
+
+map.builder.prototype.setRadius = function(radius) {
+  if (radius < 0) {
+    throw new RangeError('Radius must be a positive number');
+  }
+  this.radius = radius;
 };
 
 ['min_latitude', 'max_latitude', 'min_longitude', 'max_longitude'].forEach(function(name) {
@@ -71,11 +80,19 @@ map.builder.prototype.setShape = function(shape_class, shape_options) {
   map.builder.prototype['set' + camelized_name] = function(limit) {
     limit = parseInt(limit, 10);
     if (limit > max || limit < -max) {
-      throw new RangeError('Invalid limit');
+      throw new RangeError('Invalid ' + camelized_name + ': must be included in -' + max + '..' + max);
     }
     this[name] = limit;
   };
 });
+
+map.builder.prototype.setSeed = function(seed) {
+  this.seed = seed;
+};
+
+map.builder.prototype.setPrng = function(prng) {
+  this.prng = prng;
+};
 
 map.builder.prototype.build = function() {
   if (this.steps.length == 0) {
@@ -89,28 +106,19 @@ map.builder.prototype.defaultSteps = function() {
   var steps = new map.core.stack();
 
   steps.push({
-    name:     'Set center',
-    callback: function() {
-      var x = Math.round((this.max_longitude * -1) / ((this.min_longitude - this.max_longitude) / this.width))
-        , y = Math.round((this.max_latitude * -1) / ((this.min_latitude - this.max_latitude) / this.height))
-        ;
-      this.center = new map.graph.point(x, y);
-
-      this.shorter_dimension = (x > y ? y : x) * 2;
-      this.larger_dimension  = (x > y ? x : y) * 2;
-    }
-  });
-
-  steps.push({
     name:     'Generate random points',
     callback: function() {
+      var latitude_range  = (this.max_latitude - this.min_latitude)
+        , longitude_range = (this.max_longitude - this.min_longitude)
+        , num_points      = (latitude_range * longitude_range * this.resolution)
+        ;
+      
       this.points = [];
-      for (var i = 0, num_points = Math.round((this.width * this.height) / 500); i <= num_points; i++) {
-        var x = Math.round(Math.random() * this.width)
-          , y = Math.round(Math.random() * this.height)
-          ;
-
-        this.points.push(new map.graph.point(x, y));
+      for (var i = 0; i <= num_points; i++) {
+        this.points.push({
+          x: this.prng.nextRange(0, this.max_longitude - this.min_longitude)
+        , y: this.prng.nextRange(0, this.max_latitude  - this.min_latitude )
+        });
       }
     }
   });
@@ -122,7 +130,12 @@ map.builder.prototype.defaultSteps = function() {
         , self                = this
         , improveRandomPoints = function(points) {
           var _voronoi = new Voronoi()
-            , diagram  = _voronoi.compute(points, { xl: 0, xr: self.width, yt: 0, yb: self.height })
+            , diagram  = _voronoi.compute(points, {
+                  xl: 0
+                , xr: (self.max_longitude - self.min_longitude)
+                , yt: 0
+                , yb: (self.max_latitude - self.min_latitude)
+              })
             , _points  = []
             ;
 
@@ -137,7 +150,7 @@ map.builder.prototype.defaultSteps = function() {
               y += (halfedge.getStartpoint().y / l) + (halfedge.getEndpoint().y / l);
             });
 
-            _points.push(new map.graph.point(Math.round(x), Math.round(y)));
+            _points.push({ x: x, y: y });
           });
 
           return _points;
@@ -154,25 +167,29 @@ map.builder.prototype.defaultSteps = function() {
     callback: function() {
 
       var voronoi = new Voronoi()
-        , diagram = voronoi.compute(this.points, { xl: 0, xr: this.width, yt: 0, yb: this.height })
+        , diagram = voronoi.compute(this.points, {
+              xl: 0
+            , xr: (this.max_longitude - this.min_longitude)
+            , yt: 0
+            , yb: (this.max_latitude - this.min_latitude)
+          })
         ;
 
       // Associates edges and corners
       diagram.edges.forEach(function(_e) {
 
-        var index   = null
-          , a_x     = Math.round(_e.va.x)
-          , a_y     = Math.round(_e.va.y)
-          , b_x     = Math.round(_e.vb.x)
-          , b_y     = Math.round(_e.vb.y)
+        var a_lng = _e.va.x + this.min_longitude
+          , a_lat = _e.va.y - this.max_latitude
+          , b_lng = _e.vb.x + this.min_longitude
+          , b_lat = _e.vb.y - this.max_latitude
 
-          , e       = new map.graph.point(Math.round((a_x + b_x) / 2), Math.round((a_y + b_y) / 2), this)
-          , a       = new map.graph.point(a_x, a_y, this)
-          , b       = new map.graph.point(b_x, b_y, this)
+          , e     = new map.graph.point((a_lat + b_lat) / 2, (a_lng + b_lng) / 2, this)
+          , a     = new map.graph.point(a_lat, a_lng, this)
+          , b     = new map.graph.point(b_lat, b_lng, this)
 
-          , edge    = new map.graph.edge(e)
-          , ca      = (this.corners[a.toString()] || new map.graph.corner(a))
-          , cb      = (this.corners[b.toString()] || new map.graph.corner(b))
+          , edge  = new map.graph.edge(e)
+          , ca    = (this.corners[a.toString()] || new map.graph.corner(a))
+          , cb    = (this.corners[b.toString()] || new map.graph.corner(b))
           ;
 
         ca.edges[edge.toString()] = edge;
@@ -183,7 +200,7 @@ map.builder.prototype.defaultSteps = function() {
 
         [_e.lSite, _e.rSite].forEach(function(site) {
           if (site) {
-            var s    = new map.graph.point(Math.round(site.x), Math.round(site.y), this)
+            var s    = new map.graph.point(site.y - this.max_latitude, site.x + this.min_longitude, this)
               , c    = (this.centers[s.toString()] || new map.graph.center(s))
               ;
 
@@ -225,6 +242,7 @@ map.builder.prototype.defaultSteps = function() {
     }
   });
 
+  /*
   steps.push({
     name:     'Apply shape',
     callback: function() {
@@ -276,6 +294,7 @@ map.builder.prototype.defaultSteps = function() {
       }, this, this.centers.select(function(c) { return c.coast; }).toArray());
     }
   });
+  */
 
   return steps;
 };

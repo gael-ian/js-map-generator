@@ -14,29 +14,6 @@ map.graph.center = function(point) {
   
 };
 map.utils.inherits(map.graph.center, map.graph.location);
-  
-map.graph.center.prototype.border = function(side) {
-  var side = side || 'any';
-  if (undefined === this._border[side]) {
-    this._border[side] = (null !== this.corners.detect(function(c) { return c.border(side) }));
-  }
-  return this._border[side];
-};
-  
-map.graph.center.prototype.opposite = function() {
-  if (undefined === this._opposite) {
-    var y = this.point.y
-      , x = this.point.context.center.x + (this.point.context.center.x - this.point.x)
-      , p = new map.graph.point(x, y, this.point.context)
-      ;
-    this._opposite = this.point.context.centers.reduce(function(o, c) {
-      if (null === o) return c;
-      if (c.point.distanceFrom(p) < o.point.distanceFrom(p)) return c;
-      return o;
-    }, this, null);
-  }
-  return this._opposite;
-};
 
 map.graph.center.prototype.pathTo = function(locations) {
   var path   = [this]
@@ -66,3 +43,28 @@ map.graph.center.prototype.pathTo = function(locations) {
   });
   return path;
 };
+
+/*  
+map.graph.center.prototype.border = function(side) {
+  var side = side || 'any';
+  if (undefined === this._border[side]) {
+    this._border[side] = (null !== this.corners.detect(function(c) { return c.border(side) }));
+  }
+  return this._border[side];
+};
+  
+map.graph.center.prototype.opposite = function() {
+  if (undefined === this._opposite) {
+    var y = this.point.y
+      , x = this.point.context.center.x + (this.point.context.center.x - this.point.x)
+      , p = new map.graph.point(x, y, this.point.context)
+      ;
+    this._opposite = this.point.context.centers.reduce(function(o, c) {
+      if (null === o) return c;
+      if (c.point.distanceFrom(p) < o.point.distanceFrom(p)) return c;
+      return o;
+    }, this, null);
+  }
+  return this._opposite;
+};
+*/

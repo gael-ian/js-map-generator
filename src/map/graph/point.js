@@ -2,14 +2,17 @@
  * map.graph.point
  * Base unit for the graph
  */
-map.graph.point = function(x, y, context) {
+map.graph.point = function(latitude, longitude, context) {
   
-  this.x  = x;
-  this.y  = y;
+  this.latitude  = latitude;
+  this.longitude = longitude;
+  
+  this.r_latitude  = this.latitude * (Math.PI / 180);
+  this.r_longitude = this.longitude * (Math.PI / 180);
 
   this.context = (context || null);
 
-  this._s = [x, y].join(':');
+  this._s = [latitude, longitude].join(':');
 };
 
 map.graph.point.prototype.toString = function() {
@@ -20,6 +23,23 @@ map.graph.point.prototype.setContext = function(context) {
   this.context = context;
 };
 
+// Use the great-circle approximation
+// See http://en.wikipedia.org/wiki/Great-circle_distance
+map.graph.point.prototype.distanceFrom = function(point) {
+  if (null == this.context) {
+    throw new TypeError('context not set for ' + this);
+  }
+  var cos =   (Math.sin(this.r_latitude) * Math.sin(point.r_latitude))
+            + (Math.cos(this.r_latitude) * Math.cos(point.r_latitude) * Math.cos(this.r_longitude - point.r_longitude))
+    ;
+  return Math.acos(cos) * this.context.radius;
+};
+
+map.graph.point.prototype.distanceFromCenter = function() {
+  return this.distanceFrom({ phi: 0, theta: 0});
+};
+
+/*
 map.graph.point.prototype.border = function(side) {
   if (null == this.context) {
     throw new TypeError('context not set for ' + this);
@@ -41,73 +61,4 @@ map.graph.point.prototype.border = function(side) {
       return (this.x == 0 || this.y == 0 || this.x == this.context.width || this.y == this.context.height);
   }
 }
-
-map.graph.point.prototype.distanceFrom = function(point) {
-  var x = (this.x - point.x)
-    , y = (this.y - point.y)
-    ;
-  return Math.sqrt(x*x + y*y);
-};
-
-map.graph.point.prototype.radiantFrom = function(point) {
-  var x = (this.x - point.x)
-    , y = (this.y - point.y)
-    ;
-  return Math.atan2(y, x);
-};
-
-map.graph.point.prototype.distanceFromCenter = function() {
-  if (null == this.context) {
-    throw new TypeError('context not set for ' + this);
-  }
-  var x = (this.x - this.context.center.x)
-    , y = (this.y - this.context.center.y)
-    ;
-  return Math.sqrt(x*x + y*y);
-};
-
-map.graph.point.prototype.radiantFromCenter = function() {
-  if (null == this.context) {
-    throw new TypeError('context not set for ' + this);
-  }
-  var x = (this.x - this.context.center.x)
-    , y = (this.y - this.context.center.y)
-    ;
-  return Math.atan2(y, x);
-};
-
-map.graph.point.prototype.latitude = function() {
-  if (null == this.context) {
-    throw new TypeError('context not set for ' + this);
-  }
-
-  var y_dist = Math.abs(this.context.center.y - this.y)
-    , y_max  = ((this.y < this.context.center.y)
-        ? this.context.center.y
-        : (this.context.height - this.context.center.y)
-        )
-    , l_max  = ((this.y < this.context.center.y)
-        ? this.context.max_latitude
-        : this.context.min_latitude
-        )
-    ;
-  return ((y_dist * l_max) / y_max);
-};
-
-map.graph.point.prototype.longitude = function() {
-  if (null == this.context) {
-    throw new TypeError('context not set for ' + this);
-  }
-
-  var x_dist = Math.abs(this.context.center.x - this.x)
-    , x_max  = ((this.x < this.context.center.x)
-        ? this.context.center.x
-        : (this.context.width - this.context.center.x)
-        )
-    , l_max  = ((this.x < this.context.center.x)
-        ? this.context.max_longitude
-        : this.context.min_longitude
-        )
-    ;
-  return ((x_dist * l_max) / x_max);
-};
+*/
