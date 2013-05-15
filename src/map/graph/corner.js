@@ -11,8 +11,6 @@ map.graph.corner = function(point) {
 };
 map.utils.inherits(map.graph.corner, map.graph.location);
 
-/*
 map.graph.corner.prototype.border = function(side) {
   return this.point.border(side);
 };
-*/

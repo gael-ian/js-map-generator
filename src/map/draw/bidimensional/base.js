@@ -105,7 +105,6 @@ map.draw.bidimensional.base.prototype.defaultSteps = function() {
     }
   });
   
-  /*
   steps.push({
     name:     'Draw elevation',
     callback: function(context, drawer) {
@@ -141,6 +140,7 @@ map.draw.bidimensional.base.prototype.defaultSteps = function() {
     }
   });
 
+  /*
   steps.push({
     name:     'Draw biomes',
     callback: function(context) {

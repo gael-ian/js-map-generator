@@ -241,8 +241,7 @@ map.builder.prototype.defaultSteps = function() {
       });
     }
   });
-
-  /*
+  
   steps.push({
     name:     'Apply shape',
     callback: function() {
@@ -250,6 +249,7 @@ map.builder.prototype.defaultSteps = function() {
     }
   });
 
+  /*
   steps.push({
     name:     'Assign corner elevation',
     callback: function() {

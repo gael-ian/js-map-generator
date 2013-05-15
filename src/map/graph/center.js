@@ -44,7 +44,6 @@ map.graph.center.prototype.pathTo = function(locations) {
   return path;
 };
 
-/*  
 map.graph.center.prototype.border = function(side) {
   var side = side || 'any';
   if (undefined === this._border[side]) {
@@ -52,7 +51,8 @@ map.graph.center.prototype.border = function(side) {
   }
   return this._border[side];
 };
-  
+
+/*
 map.graph.center.prototype.opposite = function() {
   if (undefined === this._opposite) {
     var y = this.point.y

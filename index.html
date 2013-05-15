@@ -99,23 +99,23 @@
         ;
 
       // Setup builder
-      builder.setShape(map.build.shape.pangea);
+      builder.setShape(map.build.shape.circle);
       
       builder.build();
       
-
-      /*
       steps['graph'].removeBefore('Draw edges');
       steps['graph'].removeAfter('Draw corners');
       
       steps['elevation'].removeBefore('Draw elevation');
       steps['elevation'].removeAfter('Draw elevation');
 
+      /*
       steps['biomes'].removeBefore('Draw elevation');
       steps['biomes'].removeAfter('Draw biomes');
 
       steps['latlong'].removeBefore('Draw equator & tropics');
       steps['latlong'].removeAfter('Draw equator & tropics');
+      */
 
       Object.keys(steps).forEach(function(layer) {
         document.getElementById('draw-' + layer).addEventListener('click', function(e) {
@@ -125,9 +125,8 @@
           drawer.draw(builder);
         }, false);
       });
-      */
       
-      drawer.steps = steps['graph'];
+      drawer.steps = steps['elevation'];
       drawer.draw(builder);
       
     </script>

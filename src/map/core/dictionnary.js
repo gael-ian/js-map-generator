@@ -109,22 +109,27 @@ map.core.dictionary.prototype.asQueue = function(callback, scope, queue) {
 };
 
 map.core.dictionary.prototype.clockwise = function(iterator, scope) {
-  var clock = []
-    , x     = 0
-    , y     = 0;
+  var clock     = []
+    , longitude = 0
+    , latitude  = 0;
 
   for(var i in keys = Object.keys(this)) {
     var item = this[keys[i]];
 
     clock.push(item);
-    x += item.point.x;
-    y += item.point.y;
+    longitude += item.point.longitude;
+    latitude  += item.point.latitude;
   }
-  x = x / keys.length;
-  y = y / keys.length;
+  longitude = longitude / keys.length;
+  latitude  = latitude / keys.length;
 
-  var center = new map.graph.point(x, y)
-    , angle  = function(p) { return Math.atan2((p.point.y - center.y), (p.point.x - center.x)); }
+  var center = new map.graph.point(latitude, longitude)
+    , angle  = function(p) {
+        var d_lat = (p.point.latitude - center.latitude)
+          , d_lng = (p.point.longitude - center.longitude)
+          ;
+        return Math.atan2(d_lat, d_lng);
+      }
     ;
 
   clock.sort(function(a, b) {

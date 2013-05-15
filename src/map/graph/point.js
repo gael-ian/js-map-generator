@@ -39,26 +39,24 @@ map.graph.point.prototype.distanceFromCenter = function() {
   return this.distanceFrom({ phi: 0, theta: 0});
 };
 
-/*
 map.graph.point.prototype.border = function(side) {
   if (null == this.context) {
     throw new TypeError('context not set for ' + this);
   }
   switch(side) {
     case 'west':
-      return (this.x == 0);
+      return (this.longitude == this.context.min_longitude);
       
     case 'east':
-      return (this.x == this.context.width);
+      return (this.longitude == this.context.max_longitude);
       
     case 'north':
-      return (this.y == 0);
+      return (this.latitude == this.context.max_latitude);
       
     case 'south':
-      return (this.y == this.context.height);
+      return (this.latitude == this.context.min_latitude);
       
     default:
-      return (this.x == 0 || this.y == 0 || this.x == this.context.width || this.y == this.context.height);
+      return (this.border('north') || this.border('east') || this.border('south') || this.border('west'));
   }
-}
-*/
+};
