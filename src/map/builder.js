@@ -106,6 +106,19 @@ map.builder.prototype.defaultSteps = function() {
   var steps = new map.core.stack();
 
   steps.push({
+    name:     'Compute relative dimensions',
+    callback: function() {
+      var lat = this.min_latitude + ((this.max_latitude - this.min_latitude) / 2)
+        , lng = this.min_longitude + ((this.max_longitude - this.min_longitude) / 2)
+        ;
+      this.center = new map.graph.point(lat, lng);
+      
+      this.longitudinal_circ = (this.max_longitude - this.min_longitude) * (Math.PI / 180) * this.radius;
+      this.latitudinal_circ  = (this.max_latitude - this.min_latitude) * (Math.PI / 180) * this.radius;
+    }
+  });
+
+  steps.push({
     name:     'Generate random points',
     callback: function() {
       var latitude_range  = (this.max_latitude - this.min_latitude)

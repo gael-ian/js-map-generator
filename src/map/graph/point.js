@@ -36,7 +36,10 @@ map.graph.point.prototype.distanceFrom = function(point) {
 };
 
 map.graph.point.prototype.distanceFromCenter = function() {
-  return this.distanceFrom({ phi: 0, theta: 0});
+  if (null == this.context) {
+    throw new TypeError('context not set for ' + this);
+  }
+  return this.distanceFrom(this.context.center);
 };
 
 map.graph.point.prototype.border = function(side) {
