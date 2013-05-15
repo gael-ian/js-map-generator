@@ -2,7 +2,6 @@ map.build.shape.perlin = function(builder, options) {
 
   this.builder = builder;
   this.options = map.utils.merge( (options || {}), {
-    seed:      Math.floor(Math.random() * ((new Date()).getTime() % this.builder.width)),
     width:     128,
     height:    128,
     base_x:    64,
@@ -10,25 +9,31 @@ map.build.shape.perlin = function(builder, options) {
     ceil:      5000,
     sea_level: 3000
   });
+
+  this.x = function(point) {
+    var range_longitude = (this.builder.max_longitude - this.builder.min_longitude)
+      , delta_longitude = (point.longitude - this.builder.min_longitude)
+      ;
+    return Math.round(delta_longitude * this.options.width / range_longitude);
+  };
+
+  this.y = function(point) {
+    var range_latitude = (this.builder.max_latitude - this.builder.min_latitude)
+      , delta_latitude = (this.builder.max_latitude - point.latitude)
+      ;
+    return Math.round(delta_latitude * this.options.height / range_latitude);
+  };
   
   this.apply = function() {
     var shape      = this
       , bitmap     = new BitmapData(this.options.width, this.options.height)
-      , x_coeff    = this.options.width / this.builder.width
-      , y_coeff    = this.options.height / this.builder.height
       , blue_scale = map.core.easing.easeInOutSine({ x: 0, y: 0 }, { x: 255, y: (2 * this.options.ceil) })
       ;
       
-    bitmap.perlinNoise(this.options.base_x, this.options.base_y, this.options.seed, BitmapDataChannel.BLUE, false);
+    bitmap.perlinNoise(this.options.base_x, this.options.base_y, this.builder.seed, BitmapDataChannel.BLUE, false);
 
     this.builder.centers.asQueue(function(c, queue, queued) {
-
-      var bx     = Math.round(c.point.x * x_coeff)
-        , by     = Math.round(c.point.y * y_coeff)
-        , blue   = bitmap.getPixel(bx, by)
-        ;
-
-      c.elevation = blue_scale(blue) - shape.options.sea_level;
+      c.elevation = blue_scale(bitmap.getPixel(shape.x(c.point), shape.y(c.point))) - shape.options.sea_level;
 
       if (c.elevation <= 0) c.water = true;
       c.neighbors.each(function(n) {
