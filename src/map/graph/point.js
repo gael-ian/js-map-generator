@@ -42,6 +42,20 @@ map.graph.point.prototype.distanceFromCenter = function() {
   return this.distanceFrom(this.context.center);
 };
 
+map.graph.point.prototype.radiantFrom = function(point) {
+  var d_lat = (this.latitude - point.latitude)
+    , d_lng = (this.longitude - point.longitude)
+    ;
+  return Math.atan2(d_lat, d_lng);
+};
+
+map.graph.point.prototype.radiantFromCenter = function() {
+  if (null == this.context) {
+    throw new TypeError('context not set for ' + this);
+  }
+  return this.radiantFrom(this.context.center);
+};
+
 map.graph.point.prototype.border = function(side) {
   if (null == this.context) {
     throw new TypeError('context not set for ' + this);
