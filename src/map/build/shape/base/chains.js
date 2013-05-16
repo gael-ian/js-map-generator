@@ -3,17 +3,13 @@ map.build.shape.base.chains = function(builder, options) {
   this.builder = builder;
   this.options = map.utils.merge( (options || {}), this.defaultOptions());
 
-  this.prng      = new PRNG();
-  this.prng.seed = this.options.seed;
-
   this.mountains = [];
   this.trenches  = [];
 };
 
 map.build.shape.base.chains.prototype.defaultOptions = function() {
   return {
-      seed:  Math.floor(Math.random() * ((new Date()).getTime() % this.builder.width))
-    , ceil:  9000
+      ceil:  9000
     , noise: function(x, elevation) {
         return (elevation + 0.2 * Math.sin(x) * elevation);
       }
@@ -30,8 +26,8 @@ map.build.shape.base.chains.prototype.chains = function(n, matcher) {
     ;
   
   points = points.sort(function(a, b) {
-    var c = a.point.latitude()
-      , d = b.point.latitude()
+    var c = a.point.latitude
+      , d = b.point.latitude
       ;
     return ((c > d) ? 1 : ((c < d) ? -1 : 0));
   });
@@ -117,13 +113,11 @@ map.build.shape.base.chains.prototype.interpolate = function() {
     }, this);
     
     main_border.each(function(c) {
-      var o = c.opposite()
-        , d = c.point.y + (this.builder.width - o.point.y)
-        ;
+      var o = c.opposite();
       if (Math.abs(c.elevation) > Math.abs(o.elevation)) {
-        c.elevation = this.options.noise(d, o.elevation);
+        c.elevation = o.elevation;
       } else {
-        o.elevation = this.options.noise(d, c.elevation);
+        o.elevation = c.elevation;
       }    
     }, this);
     
@@ -170,7 +164,7 @@ map.build.shape.base.chains.prototype.matrix = function(width, height) {
   var matrix = map.utils.matrix(width, height);
   for (var i = 0; i < width; i++) {
     for (var j = 0; j < height; j++) {
-      matrix[i][j] = ['trenches', 'mountains'][Math.round(this.prng.nextRange(0, 2))];
+      matrix[i][j] = ['trenches', 'mountains'][Math.floor(this.builder.prng.nextRange(0, 2))];
     }
   }
   return matrix;
@@ -180,27 +174,32 @@ map.build.shape.base.chains.prototype.apply = function() {
   var shape           = this
     , latitude_range  = (this.builder.max_latitude - this.builder.min_latitude)
     , longitude_range = (this.builder.max_longitude - this.builder.min_longitude)
-    , width           = Math.round(this.prng.nextRange(longitude_range/12, longitude_range/18))
-    , height          = Math.round(this.prng.nextRange(latitude_range/12, latitude_range/18))
+    , width           = Math.round(this.builder.prng.nextRange(8, 12))
+    , height          = Math.round(this.builder.prng.nextRange(8, 12))
     , matrix          = this.matrix(width, height)
+    , dx              = Math.ceil(longitude_range/width)
+    , dy              = Math.ceil(latitude_range/height)
     ;
 
-  for (var x = 0, i = 0, dx = Math.ceil(this.builder.width/width); x < this.builder.width; x += dx, i++) {
-    for (var y = 0, j = 0, dy = Math.ceil(this.builder.height/height); y < this.builder.height; y += dy, j++) {
+  for (var i = 0, x = this.builder.min_longitude; i < width; x += dx, i++) {
+    for (var j = 0, y = this.builder.max_latitude; j < height; y -= dy, j++) {
       
       var pool       = matrix[i][j]
         , collection = this[pool]
         , elevation  = (pool == 'trenches' ? -this.options.ceil : this.options.ceil)
         , elevations = [elevation, elevation/3, elevation, elevation/5]
-        , pits       = Math.round(this.prng.nextRange(1, 3))
+        , pits       = Math.round(this.builder.prng.nextRange(1, 3))
         , chains     = this.chains(pits, function(c) {
-            return (c.point.x >= x && c.point.x <= x + dx && c.point.y >= y && c.point.y <= y + dy);
+            return (
+                 c.point.longitude >= x && c.point.longitude <= x + dx
+              && c.point.latitude <= y && c.point.latitude >= y - dy
+              );
           }, this.builder)
         ;
       chains.forEach(function(chain) {
-        elevation = elevations[Math.floor(this.prng.nextRange(0, elevations.length - 1))];
+        elevation = elevations[Math.floor(this.builder.prng.nextRange(0, elevations.length - 1))];
         chain.forEach(function(c) {
-          c.elevation = this.options.noise(c.point.x, elevation);
+          c.elevation = elevation;
           collection.push(c);
         }, this);
       }, this);

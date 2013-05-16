@@ -29,7 +29,7 @@ map.build.shape.pangea.prototype.matrix = function(width, height) {
           pool = ['trenches', 'trenches', 'mountains'];
           break;
       }
-      matrix[i][j] = pool[Math.round(this.prng.nextRange(0, pool.length - 1))];
+      matrix[i][j] = pool[Math.round(this.builder.prng.nextRange(0, pool.length - 1))];
 
     }
   }

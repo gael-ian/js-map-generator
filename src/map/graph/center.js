@@ -52,12 +52,11 @@ map.graph.center.prototype.border = function(side) {
   return this._border[side];
 };
 
-/*
 map.graph.center.prototype.opposite = function() {
   if (undefined === this._opposite) {
-    var y = this.point.y
-      , x = this.point.context.center.x + (this.point.context.center.x - this.point.x)
-      , p = new map.graph.point(x, y, this.point.context)
+    var lat = this.point.latitude
+      , lng = this.point.context.center.longitude + (this.point.context.center.longitude - this.point.longitude)
+      , p   = new map.graph.point(lat, lng, this.point.context)
       ;
     this._opposite = this.point.context.centers.reduce(function(o, c) {
       if (null === o) return c;
@@ -67,4 +66,3 @@ map.graph.center.prototype.opposite = function() {
   }
   return this._opposite;
 };
-*/

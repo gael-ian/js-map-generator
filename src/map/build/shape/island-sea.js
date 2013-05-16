@@ -6,8 +6,7 @@ map.utils.inherits(map.build.shape.island_sea, map.build.shape.base.chains);
 
 map.build.shape.island_sea.prototype.defaultOptions = function() {
   return {
-      seed:  Math.floor(Math.random() * ((new Date()).getTime() % this.builder.width))
-    , ceil:  9000
+      ceil:  9000
     , noise: function(x, elevation) {
         return (elevation); // + 0.2 * Math.sin(bump * x) * elevation);
       }
@@ -41,7 +40,7 @@ map.build.shape.island_sea.prototype.matrix = function(width, height) {
           pool = ['mountains'];
           break;
       }
-      matrix[i][j] = pool[Math.round(this.prng.nextRange(0, pool.length - 1))];
+      matrix[i][j] = pool[Math.round(this.builder.prng.nextRange(0, pool.length - 1))];
 
     }
   }
