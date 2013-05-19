@@ -17,8 +17,6 @@
       <ul id="layers">
         <li><a id="draw-graph" href="#">Graph</a></li>
         <li><a id="draw-elevation" href="#">Elevation</a></li>
-        <li><a id="draw-biomes" href="#">Biomes</a></li>
-        <li><a id="draw-latlong" href="#">Equator &amp; tropics</a></li>
       </ul>
       
       <canvas id="map" width="950" height="750"></canvas>
@@ -57,10 +55,15 @@
     <script type="text/javascript" src="./src/map/build/shape/island-sea.js"></script>
 
     <script type="text/javascript" src="./src/map/draw/base.js"></script>
-    <script type="text/javascript" src="./src/map/draw/bidimensional/base.js"></script>
-    <script type="text/javascript" src="./src/map/draw/bidimensional/proportional.js"></script>
-    <script type="text/javascript" src="./src/map/draw/bidimensional/mercator.js"></script>
+    <script type="text/javascript" src="./src/map/draw/bidimensional.js"></script>
+    <script type="text/javascript" src="./src/map/draw/tridimensional.js"></script>
+    
+    <script type="text/javascript" src="./src/map/draw/projection/bidimensional/proportional.js"></script>
+    <script type="text/javascript" src="./src/map/draw/projection/bidimensional/mercator.js"></script>
+    
+    <script type="text/javascript" src="./src/map/draw/projection/tridimensional/proportional.js"></script>
 
+    <!--
     <script type="text/javascript" src="./src/map/build/biome/archtype/base.js"></script>
     <script type="text/javascript" src="./src/map/build/biome/archtype/coastal.js"></script>
     <script type="text/javascript" src="./src/map/build/biome/archtype/montane.js"></script>
@@ -79,7 +82,7 @@
     <script type="text/javascript" src="./src/map/build/biome/tropical_grassland.js"></script>
     <script type="text/javascript" src="./src/map/build/biome/tropical_rainforest.js"></script>
     <script type="text/javascript" src="./src/map/build/biome/tundra.js"></script>
-    
+    -->
     
     <script type="text/javascript" src="./src/map/builder.js"></script>
     <script type="text/javascript" src="./src/map/drawer.js"></script>
@@ -88,34 +91,25 @@
     
       var canvas        = document.getElementById('map')
         , builder       = new map.builder()
-        , drawer        = new map.draw.bidimensional.proportional(canvas)
-
+        , drawer        = new map.draw.bidimensional(canvas)
         , steps = {
             graph:      drawer.defaultSteps()
           , elevation:  drawer.defaultSteps()
-          , biomes:     drawer.defaultSteps()
-          , latlong:    drawer.defaultSteps()
-        }
+          }
         ;
 
       // Setup builder
       builder.setShape(map.build.shape.pangea);
-      
       builder.build();
+      
+      // Setup drawer
+      drawer.setProjection('proportional');
       
       steps['graph'].removeBefore('Draw edges');
       steps['graph'].removeAfter('Draw corners');
       
       steps['elevation'].removeBefore('Draw elevation');
       steps['elevation'].removeAfter('Draw elevation');
-
-      /*
-      steps['biomes'].removeBefore('Draw elevation');
-      steps['biomes'].removeAfter('Draw biomes');
-
-      steps['latlong'].removeBefore('Draw equator & tropics');
-      steps['latlong'].removeAfter('Draw equator & tropics');
-      */
 
       Object.keys(steps).forEach(function(layer) {
         document.getElementById('draw-' + layer).addEventListener('click', function(e) {

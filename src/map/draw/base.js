@@ -4,19 +4,24 @@
  */
 map.draw.base = function(canvas) {
   
-  this.steps   = new map.core.stack();
+  this.steps    = new map.core.stack();
 
-  this.width   = canvas.clientWidth;
-  this.height  = canvas.clientHeight;
+  this.width    = canvas.clientWidth;
+  this.height   = canvas.clientHeight;
   
-  this.canvas  = canvas;
+  this.canvas   = canvas;
+  
+  this.projection_namespace = null;
+  this.projection = null;
 
   this.reset();
 };
 
-map.draw.base.prototype.reset = function(canvas) {
-  this.context = this.canvas.getContext('2d');
+map.draw.base.prototype.setProjection = function(projection_class) {
+  this.projection = new this.projection_namespace[projection_class](this);
 };
+
+map.draw.base.prototype.reset = function() {};
 
 map.draw.base.prototype.draw = function(builder) {
   if (this.steps.length == 0) {

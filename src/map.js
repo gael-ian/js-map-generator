@@ -11,7 +11,9 @@ map = {
     }
   },
   draw:  {
-    bidimensional:  {},
-    tridimensional: {},
+    projection:     {
+      bidimensional:  {},
+      tridimensional: {},
+    }
   }
 };
